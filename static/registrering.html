@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/vue@3.0.5/dist/vue.global.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <title>Document</title>
+  </head>
+  <header>
+    <h1>
+        <img src="/static/images/eksamenslogo1.png"/>
+    </h1>
+    <nav>
+        <ul>
+            <li><a href=""><i class="fa fa-home"></i></a></li>
+            <li><a href=""><i class="fa fa-user"></i></a></li>
+            <li><a href=""><i class="fa fa-shopping-cart"></i></a></li>
+        </ul>
+    </nav>
+</header>
+  <body>
+    <div id="app">
+      <h1><a href=""></a><i class="fa fa-user-plus" style="font-size: 3em"></i></h1>
+      <h1 id="overskrift"> Register User </h1>
+      <br>
+      <br>
+      <form method="POST">
+        <input type="text" placeholder="Username" id="username" required>
+        <br>
+        <br>
+        <input type="text" placeholder="Password" id="password" required>
+        <br>
+        <br>
+        <a href="" id="refern">Register user</a>
+
+      </form>
+    </div>
+
+    <script src="static/js/app.js"></script>
+  </body>
+</html>
+
+<style>
+  meta {
+    width: device-width;
+    height: device-height;
+}
+
+html {
+    width: inherit;
+    height: inherit;
+}
+h1 {
+    font-family: 'Avenir, Arial, Helvetica, sans-serif';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+h2 {
+    font-family: 'Avenir, Arial, Helvetica, sans-serif';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+h3 {
+    font-family: 'Avenir, Arial, Helvetica, sans-serif';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+p {
+    font-family: 'Avenir, Arial, Helvetica, sans-serif';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+header {
+    height: 60px;
+    z-index: 4;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-right: 5%;
+    color:#FFFFFF;
+    background-color: #9932cc;
+    width: 100%;
+    position:-webkit-sticky;
+    position: sticky;
+    top: 0;
+}
+/* header h1{
+    height: 60px;
+    text-indent: 5%;
+    margin-left: 5%;
+    z-index: 5;
+    color: #9400d3;
+    background-color: #FFFFFF;
+    border: solid;
+    border-width: 3px;
+    border-color:#9932cc;
+    width: 10%;
+} */
+header nav li{
+    display: inline-block;
+    vertical-align: top;
+    justify-content: space-between;
+    padding-right: 5em;
+}
+header a:link{
+    color: #FFFFFF;
+}
+header a:visited {
+    color: #FFFFFF;
+}
+header a:hover{
+    color: #FFFFFF;
+}
+header nav ul{
+    text-indent: -5%;
+    list-style-type: none;
+    z-index: 2;
+    float: right;
+    display: inline;
+    align-items: right;
+    direction: rtl;
+    height: 10px;
+}
+header img {
+    /* height: 200px;
+    width: 200px;
+    margin-top: -50px;
+    border: solid transparent;
+    border-width: 5px;
+    border-color: #9932cc;
+    z-index: 5; */
+    margin-top: -65px;
+    border-radius: 50%;
+    overflow:hidden;
+    border-image: solid transparent;
+    border-radius: 5px;
+    border-color: #9932cc;
+    height: 150px;
+}
+body #app {
+  padding-left: 5%;
+  padding-right:5%;
+  content:center;
+  position: absolute;
+    top:  30%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.fa-user-plus {
+  color: #9932cc;
+}
+input {
+  width: 150%;
+  border: transparent;
+  border-bottom: solid;
+  border-radius: 0.5px;
+  border-color: #9932cc;
+}
+
+#username {
+  position: absolute;
+  top: 80%;
+  left: -20%;
+}
+
+#password {
+  position: absolute;
+  top: 100%;
+  left: -20%;
+}
+
+#refern {
+  position: absolute;
+  top: 120%;
+  left: 30%;
+}
+#overskrift {
+  position: absolute;
+  top: 45%;
+  left: 32.5%;
+  color: #9932cc;
+}
+
+</style>
