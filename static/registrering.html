@@ -33,10 +33,15 @@
         <input type="text" placeholder="Username" id="username" required>
         <br>
         <br>
+        <input type="text" placeholder="Email" id="email" required>
+        <br>
+        <br>
         <input type="text" placeholder="Password" id="password" required>
         <br>
         <br>
-        <a href="" id="refern">Register user</a>
+        <input type="text" placeholder="Confirm Password" id="confpass" required>
+        <input type="submit" value="Register" id="submit">
+
 
       </form>
     </div>
@@ -163,6 +168,10 @@ input {
   border-color: #9932cc;
 }
 
+input[type=text]:focus {
+  border-color: #9400d3;
+}
+
 #username {
   position: absolute;
   top: 80%;
@@ -171,20 +180,36 @@ input {
 
 #password {
   position: absolute;
-  top: 100%;
+  top: 120%;
   left: -20%;
 }
 
-#refern {
-  position: absolute;
-  top: 120%;
-  left: 30%;
-}
+
 #overskrift {
   position: absolute;
-  top: 45%;
-  left: 32.5%;
+  top: 50%;
+  left: 25%;
   color: #9932cc;
+  font-size: larger;
+}
+
+#email {
+    position: absolute;
+    top: 100%;
+    left: -20%;
+}
+#confpass {
+    position: absolute;
+    top: 140%;
+    left: -20%;
+}
+#submit {
+    background-color: #9932cc;
+    color: #FFFFFF;
+    position: absolute;
+    top: 160%;
+    left: 0%;
+    width: 100%;
 }
 
 </style>

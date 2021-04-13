@@ -36,7 +36,9 @@
         <input type="text" placeholder="Password" id="password" required>
         <br>
         <br>
-        <a href="" id="refern">Register user</a>
+        <input type="submit" value="Login" id="login">
+        <br>
+        <a href="/register" id="refern">Register user</a>
 
       </form>
     </div>
@@ -163,6 +165,10 @@ input {
   border-color: #9932cc;
 }
 
+input[type=text]:focus {
+  border-color: #4b0082;
+}
+
 #username {
   position: absolute;
   top: 80%;
@@ -177,7 +183,7 @@ input {
 
 #refern {
   position: absolute;
-  top: 120%;
+  top: 140%;
   left: 30%;
 }
 #overskrift {
@@ -185,6 +191,14 @@ input {
   top: 45%;
   left: 32.5%;
   color: #9932cc;
+}
+#login {
+  width: 100%;
+  background-color: #9932cc;
+  color: #FFFFFF;
+  position: absolute;
+  top: 120%;
+  left: 0%;
 }
 
 </style>
