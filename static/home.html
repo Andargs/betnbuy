@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://unpkg.com/vue@3.0.5/dist/vue.global.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -25,7 +24,7 @@
 </header>
   <body>
     <div id="app">
-      <h1><a href=""></a><i class="fa fa-user-circle" style="font-size: 3em"></i></h1>
+      <!-- <h1><a href=""></a><i class="fa fa-user-circle" style="font-size: 3em"></i></h1>
       <h1 id="overskrift"> Login </h1>
       <br>
       <br>
@@ -38,9 +37,9 @@
         <br>
         <input type="submit" value="Login" id="login">
         <br>
-        <a href="/register" id="refern">Register user</a>
+        <a href="/static/register.html" id="refern">Register user</a>
 
-      </form>
+      </form> -->
     </div>
 
     <script src="static/js/app.js"></script>
@@ -153,6 +152,9 @@ body #app {
     left: 50%;
     transform: translate(-50%,-50%);
 }
+.fa-user-plus {
+  color: #9932cc;
+}
 
 .fa-user-circle {
   color: #9932cc;
@@ -181,6 +183,12 @@ input[type=text]:focus {
   left: -20%;
 }
 
+#passwordreg {
+  position: absolute;
+  top: 120%;
+  left:-20%;
+}
+
 #refern {
   position: absolute;
   top: 140%;
@@ -192,6 +200,15 @@ input[type=text]:focus {
   left: 32.5%;
   color: #9932cc;
 }
+
+#overskriftreg {
+  position: absolute;
+  top: 50%;
+  left: 25%;
+  color: #9932cc;
+  font-size: larger;
+}
+
 #login {
   width: 100%;
   background-color: #9932cc;
@@ -199,6 +216,25 @@ input[type=text]:focus {
   position: absolute;
   top: 120%;
   left: 0%;
+}
+
+#email {
+    position: absolute;
+    top: 100%;
+    left: -20%;
+}
+#confpass {
+    position: absolute;
+    top: 140%;
+    left: -20%;
+}
+#submit {
+    background-color: #9932cc;
+    color: #FFFFFF;
+    position: absolute;
+    top: 160%;
+    left: 0%;
+    width: 100%;
 }
 
 </style>
