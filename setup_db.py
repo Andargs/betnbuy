@@ -50,6 +50,7 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
 
+
 def add_user(conn, username,password,email):
     """
     Add a new user into the students table
@@ -89,3 +90,15 @@ def add_product(conn, id,description,tickets, mincost, owner, spenders):
         conn.commit()
     except Error as e:
         print(e)
+
+
+
+
+####################BASE SETUP######################
+
+def setup():
+    conn = create_connection(database)
+    if conn is not None:
+        create_table(conn, sql_create_product_table)
+        create_table(conn, sql_create_user_table)
+        conn.close()
