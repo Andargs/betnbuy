@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from setup_db import add_user, add_product
+from setup_db import add_user, add_product, setup, passwordcheck
 import json
 
 app = Flask(__name__)
@@ -15,6 +15,10 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 DATABASE = './database.db'
 
+def valid_login(username, password):
+    if username is not None:
+        return check_password_hash(username,password)
+    return False
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -37,58 +41,59 @@ def close_connection(exception):
 def home():
     #hent db
     conn = get_db()
-    #Finn nåværende url for å kunne gjennomføre forms og hente/sende riktig info i riktig form
+    ###################################LOGIN FUNCTIONS#######################################################
+    if request.method == "POST":
+        username = request.form.get('username')
+        password = request.form.get('password')
+        print(password)
+        print(username)
+        if username is not None and password is not None:
+            try:
+                Useraccesed = passwordcheck(conn, username, password)
+                if username == Useraccesed[0] and password == Useraccesed[1]:
+                    print("Login approved")
+                else:
+                    print("login failed")
+            except SyntaxError:
+                flash('No users by that name')
     
-    currwind = request.url_rule
-    
-
-    #Funksjoner gjort i #register route
-    print("VI ER HER")
-    if 'register' in currwind.rule:
-        print("dette er register")
-    
-    #if currwind == '/#register':
-        if request.method == 'POST':
-            print("OOOOOOOOOOOOOOOOOOOI")
-            usernameregister = request.form['username']
-            emailregister = request.form['email']
-            passwordregister = request.form['passwordreg']
-            passwordconf = request.form['confpass']
-            if passwordregister == passwordconf:
+    ####################################REGISTER FUNCTIONS######################################################
+    if request.method == "POST":
+        usernameregister = request.form.get('usernamereg')
+        emailregister = request.form.get('email')
+        passwordregister = request.form.get('passwordreg')
+        passwordconf = request.form.get('confpass')
+        print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
+        if request.method == "POST" and usernameregister is not None:
+            if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
                 add_user(conn, usernameregister, passwordregister, emailregister)
-                print("#########USER CREATED#############")
+                print("USER CREATED")
             else:
-                flash('Password and password confirmation must match')
-                print("IKKE LIKT PASSORD I BEGGE LINJER")
-    #Funksjoner i "/" route
-    if currwind == '/':
-        print("Dette er /")
-        if request.method == 'POST':
-            print("DAAAAAAAAAAAAAAAAMN")
-            username = request.form['username']
-            password = request.form['password']
-    return app.send_static_file("home.html")
-
-@app.route("/#register", methods=['POST', 'GET'])
-def register():
-    conn = get_db()
-    print("NÅ ER DEN PÅ DEN ANDRE REGISTRERINGEN")
-    currwind = request.url_rule
+                print("CONFPASS AND PASSWORD NOT ALIKE")
+    #Funksjoner gjort i #register route
+    # if route == '#register':
+    #     if request.method == 'POST':
+    #         usernameregister = request.form.get('username')
+    #         emailregister = request.form.get('email')
+    #         passwordregister = request.form.get('passwordreg')
+    #         passwordconf = request.form.get('confpass')
+    #         print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
+    #         if len(str(passwordregister)) > 5:
+    #             if passwordregister == passwordconf:
+    #                 add_user(conn, usernameregister, passwordregister, emailregister)
+    #                 print("#########USER CREATED#############")
+    #         else:
+    #             flash('Password and password confirmation must match')
+    #             print("IKKE LIKT PASSORD I BEGGE LINJER")
+    # #Funksjoner i "/" route
+    # if route == '/':
+    #     if request.method == 'POST':
+    #         print("Login form")
+    #         username = request.form.get('username')
+    #         password = request.form.get('password')
+    #         print(username,password)
     
-    if request.method == 'POST':
-        print("DEN REGISTRERER")
-        usernameregister = request.form['username']
-        emailregister = request.form['email']
-        passwordregister = request.form['passwordreg']
-        passwordconf = request.form['confpass']
-        if passwordregister == passwordconf:
-            add_user(conn, usernameregister, passwordregister, emailregister)
-            print("#########USER CREATED#############")
-        else:
-            flash('Password and password confirmation must match')
-            print("IKKE LIKT PASSORD I BEGGE LINJER")
-
-
+    return app.send_static_file("home.html")
 
 
 

@@ -29,7 +29,7 @@ sql_create_user_table = """CREATE TABLE IF NOT EXISTS users (
                             );"""
 
 sql_create_product_table = """CREATE TABLE IF NOT EXISTS products (
-                                id INTEGER PRIMARY KEY,
+                                id INTEGER,
                                 description TEXT,
                                 tickets INTEGER,
                                 mincost INTEGER,
@@ -58,10 +58,10 @@ def add_user(conn, username,password,email):
     :param username:
     :param password:
     :param email:
-    :param tickets
-    :param products
+    :param tickets:
+    :param products:
     """
-    sql = ''' INSERT INTO users(username,password,email,1000,null)
+    sql = ''' INSERT INTO users(username,password,email,tickets,products)
               VALUES(?,?,?,1000,null) '''
     try:
         cur = conn.cursor()
@@ -69,6 +69,17 @@ def add_user(conn, username,password,email):
         conn.commit()
     except Error as e:
         print(e)
+
+
+def passwordcheck(conn, username, password):
+    cur = conn.cursor()
+    sql = ("SELECT username,password FROM users WHERE username = ?") 
+    cur.execute(sql, (username, ))
+    user = []
+    for element in cur:
+        user.append(element)
+
+    return user
 
 
 def add_product(conn, id,description,tickets, mincost, owner, spenders):
@@ -79,8 +90,8 @@ def add_product(conn, id,description,tickets, mincost, owner, spenders):
     :param description:
     :param tickets:
     :param mincost:
-    :param owner
-    :param spenders
+    :param owner:
+    :param spenders:
     """
     sql = ''' INSERT INTO users(id,description,tickets,mincost,owner, spenders)
               VALUES(?,?,?,?,?,?) '''
@@ -102,3 +113,7 @@ def setup():
         create_table(conn, sql_create_product_table)
         create_table(conn, sql_create_user_table)
         conn.close()
+
+
+if __name__ == '__main__':
+    setup()
