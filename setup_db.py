@@ -71,10 +71,10 @@ def add_user(conn, username,password,email):
         print(e)
 
 
-def passwordcheck(conn, username, password):
+def passwordcheck(conn, username):
     cur = conn.cursor()
     sql = ("SELECT username,password FROM users WHERE username = ?") 
-    cur.execute(sql, (username, ))
+    cur.execute(sql, (username,))
     user = []
     for element in cur:
         user.append(element)

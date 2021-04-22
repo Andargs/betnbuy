@@ -32,6 +32,24 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
+#Handles the data and gives it back in a managable format. Request.get_json doesnt respond well with the js router, so i had to improvise
+def handle_data(string):
+    string = str(string)
+    string = string.split("&")
+    string[0]=string[0].replace('b\'', '')
+    string[-1]=string[-1].replace('\'', '')
+    fullList= []
+    if len(string) == 4:
+        for element in string:
+            element=element.split('=')[1]
+            fullList.append(element)
+    if len(string) == 2:
+        for element in string:
+            element = element.split('=')[1]
+            fullList.append(element)
+    return fullList
+
+
 
 
 
@@ -42,34 +60,47 @@ def home():
     #hent db
     conn = get_db()
     ###################################LOGIN FUNCTIONS#######################################################
-    if request.method == "POST":
-        username = request.form.get('username')
-        password = request.form.get('password')
-        print(password)
-        print(username)
-        if username is not None and password is not None:
+    data = request.get_data()
+    if data is not None:
+        data = handle_data(data)
+    print(data)
+    if data:
+        if len(data) <=2:
             try:
-                Useraccesed = passwordcheck(conn, username, password)
-                if username == Useraccesed[0] and password == Useraccesed[1]:
-                    print("Login approved")
-                else:
-                    print("login failed")
+                username = data[0]
+                password = data[1]
+                if username is not None and password is not None:
+                    try:
+                        useraccesed = passwordcheck(conn, username)
+                        print(useraccesed)
+                        if len(useraccesed) <1:
+                            flash('User isnt registered, register and try again')
+                        if username == useraccesed[0][0] and password == useraccesed[0][1]:
+                            print("Login approved")
+                            flash('Login approved')
+                            return jsonify(useraccesed[0][0])
+                        else:
+                            print("login failed")
+                            flash('Wrong password')
+                    except SyntaxError:
+                        flash('No users by that name')
             except SyntaxError:
-                flash('No users by that name')
+                pass
     
     ####################################REGISTER FUNCTIONS######################################################
-    if request.method == "POST":
-        usernameregister = request.form.get('usernamereg')
-        emailregister = request.form.get('email')
-        passwordregister = request.form.get('passwordreg')
-        passwordconf = request.form.get('confpass')
-        print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
-        if request.method == "POST" and usernameregister is not None:
-            if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
-                add_user(conn, usernameregister, passwordregister, emailregister)
-                print("USER CREATED")
-            else:
-                print("CONFPASS AND PASSWORD NOT ALIKE")
+    if data:
+        if len(data) > 2:
+            usernameregister = data[0]
+            emailregister = data[1]
+            passwordregister = data[2]
+            passwordconf = data[3]
+            print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
+            if request.method == "POST" and usernameregister is not None:
+                if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
+                    add_user(conn, usernameregister, passwordregister, emailregister)
+                    print("USER CREATED")
+                else:
+                    print("CONFPASS AND PASSWORD NOT ALIKE")
     #Funksjoner gjort i #register route
     # if route == '#register':
     #     if request.method == 'POST':

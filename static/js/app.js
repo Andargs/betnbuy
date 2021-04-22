@@ -80,8 +80,8 @@ async function onRouteChanged() {
                         data: {
                             name: $('#usernamereg').val(),
                             email: $('#email').val(),
-                            password: $('#password').val(),
-                            passwordconf: $('confpass').val()
+                            password: $('#passwordreg').val(),
+                            passwordconf: $('#confpass').val()
                         },
                         type: "POST",
                         url: "#register"
