@@ -65,7 +65,7 @@ def home():
         data = handle_data(data)
     print(data)
     if data:
-        if len(data) <=2:
+        if len(data) ==2:
             try:
                 username = data[0]
                 password = data[1]
@@ -75,7 +75,7 @@ def home():
                         print(useraccesed)
                         if len(useraccesed) <1:
                             flash('User isnt registered, register and try again')
-                        if username == useraccesed[0][0] and password == useraccesed[0][1]:
+                        if username == useraccesed[0][0] and check_password_hash(useraccesed[0][1],password):
                             print("Login approved")
                             flash('Login approved')
                             return jsonify(useraccesed[0][0])
@@ -97,7 +97,7 @@ def home():
             print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
             if request.method == "POST" and usernameregister is not None:
                 if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
-                    add_user(conn, usernameregister, passwordregister, emailregister)
+                    add_user(conn, usernameregister, generate_password_hash(passwordregister), emailregister)
                     print("USER CREATED")
                 else:
                     print("CONFPASS AND PASSWORD NOT ALIKE")
