@@ -1,9 +1,9 @@
-from flask import Flask, jsonify, render_template, g, request, flash
+from flask import Flask, jsonify, render_template, g, request, flash, escape, session, redirect
 import sqlite3
 from datetime import datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from setup_db import add_user, add_product, setup, passwordcheck
+from setup_db import add_user, add_product, setup, passwordcheck, get_user
 import json
 
 app = Flask(__name__)
@@ -67,8 +67,8 @@ def home():
     if data:
         if len(data) ==2:
             try:
-                username = data[0]
-                password = data[1]
+                username = escape(data[0])
+                password = escape(data[1])
                 if username is not None and password is not None:
                     try:
                         useraccesed = passwordcheck(conn, username)
@@ -78,54 +78,86 @@ def home():
                         if username == useraccesed[0][0] and check_password_hash(useraccesed[0][1],password):
                             print("Login approved")
                             flash('Login approved')
-                            return jsonify(useraccesed[0][0])
+                            session['username'] = username
+                            global currentuserdata
+                            currentuserdata = get_user(conn, username)
+                            print(useraccesed[0][0])
+                            currentuser = {
+                                "username": useraccesed[0][0],
+                            }
+                            #print(json.dumps(useraccesed[0][0]))
+                            return json.dumps(currentuser)
                         else:
                             print("login failed")
                             flash('Wrong password')
+                            return json.dumps('False')
                     except SyntaxError:
                         flash('No users by that name')
             except SyntaxError:
                 pass
     
     ####################################REGISTER FUNCTIONS######################################################
-    if data:
-        if len(data) > 2:
-            usernameregister = data[0]
-            emailregister = data[1]
-            passwordregister = data[2]
-            passwordconf = data[3]
-            print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
-            if request.method == "POST" and usernameregister is not None:
-                if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
-                    add_user(conn, usernameregister, generate_password_hash(passwordregister), emailregister)
-                    print("USER CREATED")
-                else:
-                    print("CONFPASS AND PASSWORD NOT ALIKE")
-    #Funksjoner gjort i #register route
-    # if route == '#register':
-    #     if request.method == 'POST':
-    #         usernameregister = request.form.get('username')
-    #         emailregister = request.form.get('email')
-    #         passwordregister = request.form.get('passwordreg')
-    #         passwordconf = request.form.get('confpass')
+    # if data:
+    #     if len(data) > 2:
+    #         usernameregister = escape(data[0])
+    #         emailregister = escape(data[1])
+    #         passwordregister = escape(data[2])
+    #         passwordconf = escape(data[3])
     #         print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
-    #         if len(str(passwordregister)) > 5:
-    #             if passwordregister == passwordconf:
-    #                 add_user(conn, usernameregister, passwordregister, emailregister)
-    #                 print("#########USER CREATED#############")
-    #         else:
-    #             flash('Password and password confirmation must match')
-    #             print("IKKE LIKT PASSORD I BEGGE LINJER")
-    # #Funksjoner i "/" route
-    # if route == '/':
-    #     if request.method == 'POST':
-    #         print("Login form")
-    #         username = request.form.get('username')
-    #         password = request.form.get('password')
-    #         print(username,password)
+    #         if request.method == "POST" and usernameregister is not None:
+    #             if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
+    #                 id = add_user(conn, usernameregister, generate_password_hash(passwordregister), emailregister)
+    #                 if id != -1:
+    #                     flash("USER CREATED")
+    #                     print('USER CREATED')
+    #                 else:
+    #                     flash('Username already taken')
+    #                     print('USERNAME ALREADY TAKEN')
+    #             else:
+    #                 flash("CONFPASS AND PASSWORD NOT ALIKE")
     
     return app.send_static_file("home.html")
 
+@app.route('/register', methods=['POST'])
+def register():
+    conn = get_db()
+    ###################################LOGIN FUNCTIONS#######################################################
+    data = request.get_data()
+    if data is not None:
+        data = handle_data(data)
+    if data:
+        if len(data) > 2:
+            usernameregister = escape(data[0])
+            emailregister = escape(data[1])
+            passwordregister = escape(data[2])
+            passwordconf = escape(data[3])
+            print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
+            if request.method == "POST" and usernameregister is not None:
+                if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
+                    id = add_user(conn, usernameregister, generate_password_hash(passwordregister), emailregister)
+                    if id != -1:
+                        flash("USER CREATED")
+                        print('USER CREATED')
+                    else:
+                        flash('Username already taken')
+                        print('USERNAME ALREADY TAKEN')
+                else:
+                    flash("CONFPASS AND PASSWORD NOT ALIKE")
+    
+    return app.send_static_file("home.html")
+
+@app.route('/home', methods=['POST'])
+def user():
+    conn = get_db()
+    if currentuserdata:
+        return json.dumps(currentuserdata)
+    else:
+        return json.dumps("Redirect")
+    
+
+    
+    
+    return app.send_static_file('home.html')
 
 
 if __name__ == '__main__':

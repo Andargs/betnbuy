@@ -33,9 +33,8 @@ sql_create_product_table = """CREATE TABLE IF NOT EXISTS products (
                                 description TEXT,
                                 tickets INTEGER,
                                 mincost INTEGER,
-                                owner TEXT PRIMARY KEY,
-                                Spenders TEXT,
-                                Foreign key(id,owner)
+                                owner TEXT,
+                                Spenders TEXT
                             );"""
 
 def create_table(conn, create_table_sql):
@@ -67,8 +66,10 @@ def add_user(conn, username,password,email):
         cur = conn.cursor()
         cur.execute(sql, (username, password, email))
         conn.commit()
+        return "User created"
     except Error as e:
         print(e)
+        return -1
 
 
 def passwordcheck(conn, username):
@@ -81,10 +82,19 @@ def passwordcheck(conn, username):
 
     return user
 
+def get_user(conn, username):
+    cur = conn.cursor()
+    sql = ("SELECT username,tickets,products FROM users WHERE username = ?")
+    cur.execute(sql, (username,))
+    user = []
+    for element in cur:
+        user.append(element)
+    return user
+
 
 def add_product(conn, id,description,tickets, mincost, owner, spenders):
     """
-    Add a new student into the students table
+    Add a new student into the products table
     :param conn:
     :param id:
     :param description:
@@ -93,11 +103,11 @@ def add_product(conn, id,description,tickets, mincost, owner, spenders):
     :param owner:
     :param spenders:
     """
-    sql = ''' INSERT INTO users(id,description,tickets,mincost,owner, spenders)
-              VALUES(?,?,?,?,?,?) '''
+    sql = ''' INSERT INTO products(id,description,tickets,mincost,owner, spenders)
+              VALUES(?,?,0,?,?,?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (id, description, tickets, mincost, owner, spenders))
+        cur.execute(sql, (id, description, mincost, owner, spenders))
         conn.commit()
     except Error as e:
         print(e)
