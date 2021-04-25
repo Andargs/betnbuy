@@ -16,13 +16,7 @@
         <a href="/"><img src="/static/images/eksamenslogo1.png"/></a>
     </h1>
     <div id="links">
-    <!-- <nav>
-        <ul>
-            <li><a href=""><i class="fa fa-home"></i></a></li>
-            <li><a href=""><i class="fa fa-user"></i></a></li>
-            <li><a href=""><i class="fa fa-shopping-cart"></i></a></li>
-        </ul>
-    </nav> -->
+
     </div>
 </header>
   <body>
@@ -32,42 +26,13 @@
       {% endfor %} -->
     </div>
     <div id="main">
-      <section id="filter">
-        <h3>Filter Search</h3>
-        <input type="text" placeholder="Search..." name="searchbar" id="searchbar"><br>
-        <br>
-        <br>
-        <label for="house" class="checkboxes">Housing<input type="checkbox" id="house" name="house" value="house" class="checkboxes"/>
-          </label>
-          <br>
-          <br>
-          <label for="vehicle" class="checkboxes">Vehicle<input type="checkbox" id="vehicle" name="vehicle" value="vehicle" class="checkboxes"/>
-          </label>
-          <br>
-          <br>
-          <label for="travel" class="checkboxes">Travel<input type="checkbox" id="travel" name="travel" value="travel" class="checkboxes"/>
-          </label>
-          <br>
-          <br>
-          <label for="furniture" class="checkboxes">Furniture<input type="checkbox" id="furniture" name="furniture" value="furniture" class="checkboxes"/>
-          </label>
-          <br>
-          <br>
-          <label for="other" class="checkboxes">Other<input type="checkbox" id="other" name="other" value="other" class="checkboxes"/>
-          </label>
-      </section>
-    
-    
-      <section id="products">
-        <h1>hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh</h1>
-      </section>
 
-      <section id="user">
-        <ul>
+      <section id="userinfo">
+        <!-- <ul>
           <li><h3>User: Userfromerik</h3></li>
           <li><h3>Tickets: 941</h3></li>
           <li><h3>Products: Hus i spania, bil fra romerike</h3></li>
-        </ul>
+        </ul> -->
       </section>
 
     </div>
@@ -152,7 +117,7 @@ header a:hover{
 header nav ul{
     text-indent: -5%;
     list-style-type: none;
-    z-index: 2;
+
     float: right;
     display: inline;
     align-items: right;
@@ -213,9 +178,10 @@ body #main #products {
 
 }
 
-body #main #user {
+body #main #userinfo {
   max-width: 20%;
   float: right;
+  display: block;
 
 }
 

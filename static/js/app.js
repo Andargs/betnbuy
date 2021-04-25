@@ -4,7 +4,7 @@ async function onRouteChanged() {
     const app = document.getElementById('app');
     const links = document.getElementById('links')
     const main = document.getElementById("main")
-    const user = document.getElementById("user");
+    const user = document.getElementById("userinfo");
 
 
     if (!(app instanceof HTMLElement)) {
@@ -97,16 +97,6 @@ async function onRouteChanged() {
                     event.preventDefault()
                 });
             });
-
-            
-
-        //     links.innerHTML = '<nav>'
-        //     +'<ul>'
-        //         +'<li><a href=""><i class="fa fa-home"></i></a></li>'
-        //         +'<li><a href=""><i class="fa fa-user"></i></a></li>'
-        //         +'<li><a href=""><i class="fa fa-shopping-cart"></i></a></li>'
-        //     +'</ul>'
-        // +'</nav>'
             
             break;
         }
@@ -116,11 +106,45 @@ async function onRouteChanged() {
             links.innerHTML = '<nav>'
             +'<ul>'
                 +'<li><a href="#home"><i class="fa fa-home"></i></a></li>'
-                +'<li><a href="" onclick="showuser()"><i class="fa fa-user"></i></a></li>'
-                +'<li><a href=""><i class="fa fa-shopping-cart"></i></a></li>'
+                +'<li><i onclick="showuser()" class="fa fa-user"></i></li>'
+                +'<li><a href="#products"><i class="fa fa-shopping-cart"></i></a></li>'
             +'</ul>'
             +'</nav>';
-            //main.innerHTML = '<h1 action="/home">{ currentuser } </h1>';
+
+            user.innerHTML = '<ul>'
+                +'<li><h3>User: Userfromerik</h3></li>'
+                +'<li><h3>Tickets: 941</h3></li>'
+                +'<li><h3>Products: Hus i spania, bil fra romerike</h3></li>'
+            +'</ul>';
+            
+            main.innerHTML = '<section id="filter">'
+            +'<h3>Filter Search</h3>'
+            +'<input type="text" placeholder="Search..." name="searchbar" id="searchbar"><br>'
+            +'<br>'
+            +'<br>'
+            +'<label for="house" class="checkboxes">Housing<input type="checkbox" id="house" name="house" value="house" class="checkboxes"/>'
+              +'</label>'
+              +'<br>'
+              +'<br>'
+              +'<label for="vehicle" class="checkboxes">Vehicle<input type="checkbox" id="vehicle" name="vehicle" value="vehicle" class="checkboxes"/>'
+              +'</label>'
+              +'<br>'
+              +'<br>'
+              +'<label for="travel" class="checkboxes">Travel<input type="checkbox" id="travel" name="travel" value="travel" class="checkboxes"/>'
+              +'</label>'
+              +'<br>'
+              +'<br>'
+              +'<label for="furniture" class="checkboxes">Furniture<input type="checkbox" id="furniture" name="furniture" value="furniture" class="checkboxes"/>'
+              +'</label>'
+              +'<br>'
+              +'<br>'
+              +'<label for="other" class="checkboxes">Other<input type="checkbox" id="other" name="other" value="other" class="checkboxes"/>'
+              +'</label>'
+            +'</section>'
+            +'<section id="products">'
+            +'<h1>hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh</h1>'
+            +'</section>';
+
             $.ajax({
                 data: {
                 },
@@ -138,7 +162,7 @@ async function onRouteChanged() {
                 if (user.style.display === "none") {
                     user.style.display = "block";
                 } else {
-                    x.style.display = "none";
+                    user.style.display = "none";
                 }
             } 
             
@@ -147,6 +171,33 @@ async function onRouteChanged() {
 
             
             break;
+        }
+
+        case '#products':  {
+            links.innerHTML = '<nav>'
+            +'<ul>'
+                +'<li><a href="#home"><i class="fa fa-home"></i></a></li>'
+                +'<li><a href="" onclick="showuser()"><i class="fa fa-user"></i></a></li>'
+                +'<li><a href=""><i class="fa fa-shopping-cart"></i></a></li>'
+            +'</ul>'
+            +'</nav>';
+            
+
+
+            $.ajax({
+                data: {
+                },
+                type: "POST",
+                url: "/products"
+            })
+            .done(function(data){
+                console.log(data)
+                if (data === "\"Redirect\""){
+                    return window.location.hash = '/'
+                }
+            });
+
+
         }
 
         default:

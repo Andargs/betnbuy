@@ -59,7 +59,6 @@ def handle_data(string):
 def home():
     #hent db
     conn = get_db()
-    ###################################LOGIN FUNCTIONS#######################################################
     data = request.get_data()
     if data is not None:
         data = handle_data(data)
@@ -121,7 +120,6 @@ def home():
 @app.route('/register', methods=['POST'])
 def register():
     conn = get_db()
-    ###################################LOGIN FUNCTIONS#######################################################
     data = request.get_data()
     if data is not None:
         data = handle_data(data)
@@ -149,6 +147,8 @@ def register():
 @app.route('/home', methods=['POST'])
 def user():
     conn = get_db()
+    #om brukeren har logget inn sender den brukerens data sånn at brukeren kan se hva som har skjedd.
+    #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
     if currentuserdata:
         return json.dumps(currentuserdata)
     else:
@@ -158,6 +158,17 @@ def user():
     
     
     return app.send_static_file('home.html')
+
+
+@app.route('/product', methods=['POST'])
+def product():
+    conn = get_db()
+    #om brukeren har logget inn sender den brukerens data sånn at brukeren kan se hva som har skjedd.
+    #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
+    if currentuserdata:
+        return json.dumps(currentuserdata)
+    else:
+        return json.dumps("Redirect")
 
 
 if __name__ == '__main__':
