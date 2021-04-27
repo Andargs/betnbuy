@@ -28,14 +28,20 @@ sql_create_user_table = """CREATE TABLE IF NOT EXISTS users (
                                 products ID PRIMARYKEY
                             );"""
 
-sql_create_product_table = """CREATE TABLE IF NOT EXISTS products (
+sql_create_products2_table = """CREATE TABLE IF NOT EXISTS products2 (
                                 id INTEGER,
+                                name TEXT NOT NULL,
+                                img BLOB NOT NULL,
                                 description TEXT,
                                 tickets INTEGER,
-                                mincost INTEGER,
-                                owner TEXT,
+                                mincost INTEGER NOT NULL,
+                                owner TEXT NOT NULL,
                                 Spenders TEXT
                             );"""
+
+
+
+
 
 def create_table(conn, create_table_sql):
     """ create a table from the create_table_sql statement
@@ -92,22 +98,24 @@ def get_user(conn, username):
     return user
 
 
-def add_product(conn, id,description,tickets, mincost, owner, spenders):
+def add_product(conn, id,name, img,description,tickets, mincost, owner, spenders):
     """
     Add a new student into the products table
     :param conn:
     :param id:
+    :param name:
+    :param img:
     :param description:
     :param tickets:
     :param mincost:
     :param owner:
     :param spenders:
     """
-    sql = ''' INSERT INTO products(id,description,tickets,mincost,owner, spenders)
-              VALUES(?,?,0,?,?,?) '''
+    sql = ''' INSERT INTO products1(id,name,img,description,tickets,mincost,owner, spenders)
+              VALUES(?,?,?,?,0,?,?,?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (id, description, mincost, owner, spenders))
+        cur.execute(sql, (id,name, img, description, mincost, owner, spenders))
         conn.commit()
     except Error as e:
         print(e)
@@ -120,7 +128,7 @@ def add_product(conn, id,description,tickets, mincost, owner, spenders):
 def setup():
     conn = create_connection(database)
     if conn is not None:
-        create_table(conn, sql_create_product_table)
+        create_table(conn, sql_create_products2_table)
         create_table(conn, sql_create_user_table)
         conn.close()
 

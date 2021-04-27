@@ -9,6 +9,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
     <script src="http://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="static/js/app.js"></script>
     <title>Document</title>
   </head>
   <header>
@@ -25,19 +26,21 @@
       <h1>{{ msg }}</h1>
       {% endfor %} -->
     </div>
-    <div id="main">
+    <div id="productcreation">
 
-      <section id="userinfo">
-        <!-- <ul>
+    </div>
+    <div id="main">
+      <div id="userinfo">
+        <ul>
           <li><h3>User: Userfromerik</h3></li>
           <li><h3>Tickets: 941</h3></li>
           <li><h3>Products: Hus i spania, bil fra romerike</h3></li>
-        </ul> -->
-      </section>
+        </ul>
+      </div>
 
     </div>
 
-    <script src="static/js/app.js"></script>
+    
   </body>
 </html>
 
@@ -181,12 +184,38 @@ body #main #products {
 body #main #userinfo {
   max-width: 20%;
   float: right;
-  display: block;
+  color: #4b0082;
+  display: none;
 
 }
 
 body #main #filter input{
   width: 80%;
+}
+
+body #productcreation {
+  max-width: 40%;
+  padding-right: 15%;
+  padding-left: 15%;
+  content: center;
+  position: absolute;
+    top:  60%;
+    left: 44%;
+    transform: translate(-50%,-50%);
+
+}
+
+#productcreation h1{
+  color: #4b0082;
+  position:absolute;
+    top: -40%;  
+    left: 45%;
+}
+
+#createprod {
+  background-color: #9932cc;
+  color: #FFFFFF;
+  
 }
 
 body #main h3 {

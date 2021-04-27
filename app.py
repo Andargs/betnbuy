@@ -149,9 +149,10 @@ def user():
     conn = get_db()
     #om brukeren har logget inn sender den brukerens data sånn at brukeren kan se hva som har skjedd.
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
-    if currentuserdata:
-        return json.dumps(currentuserdata)
-    else:
+    try:
+        if currentuserdata:
+            return json.dumps(currentuserdata)
+    except NameError:
         return json.dumps("Redirect")
     
 
@@ -160,16 +161,24 @@ def user():
     return app.send_static_file('home.html')
 
 
-@app.route('/product', methods=['POST'])
-def product():
+@app.route('/products', methods=['POST'])
+def products():
     conn = get_db()
     #om brukeren har logget inn sender den brukerens data sånn at brukeren kan se hva som har skjedd.
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
-    if currentuserdata:
-        return json.dumps(currentuserdata)
-    else:
-        return json.dumps("Redirect")
+
+    product = request.get_data()
+    print(product)
+    if product:
+        return json.dumps('HERREKVELD')
+
+    return app.send_static_file('home.html')
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = 5000 + random.randint(0, 999)
+    print(port)
+    url = "http://127.0.0.1:{0}".format(port)
+    print(url)
+    app.run(use_reloader=False, debug=True, port=port)
+    #app.run(debug=True)
