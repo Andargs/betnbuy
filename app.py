@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from setup_db import add_user, add_product, setup, passwordcheck, get_user
+from setup_db import add_user, add_product, setup, passwordcheck, get_user, get_user_tickets
 import json
 
 app = Flask(__name__)
@@ -32,7 +32,7 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-#Handles the data and gives it back in a managable format. Request.get_json doesnt respond well with the js router, so i had to improvise
+#Handles the data and gives it back in a more managable format. 
 def handle_data(string):
     string = str(string)
     string = string.split("&")
@@ -47,7 +47,24 @@ def handle_data(string):
         for element in string:
             element = element.split('=')[1]
             fullList.append(element)
+    if len(string) == 6:
+        for element in string:
+            element = element.split('=')[1]
+            fullList.append(element)
     return fullList
+
+#handle user input with commas and colons and converts it to actually readable formats
+def handle_listdata(list):
+    list = str(list)
+    list=list.split("&")
+    list[0]=list[0].replace('b\'','')
+    list[-1]=list[-1].replace('\'','')
+    for element in list:
+        element = element.split('=')[1]
+        element = element.replace('+',' ')
+        element = element.replace('%2C', ',')
+        element = element.replace('%3A', ':')
+        print(element)
 
 
 
@@ -78,8 +95,11 @@ def home():
                             print("Login approved")
                             flash('Login approved')
                             session['username'] = username
+                            #Creates a global value with the current user, then extracts the username, their products and their tickets
                             global currentuserdata
-                            currentuserdata = get_user(conn, username)
+                            currentuserdata = [username]
+                            tickets = get_user_tickets(conn, username)
+                            currentuserdata.append(tickets[0])
                             print(useraccesed[0][0])
                             currentuser = {
                                 "username": useraccesed[0][0],
@@ -112,6 +132,7 @@ def register():
             print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
             if request.method == "POST" and usernameregister is not None:
                 if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
+                    print("oi")
                     id = add_user(conn, usernameregister, generate_password_hash(passwordregister), emailregister)
                     if id != -1:
                         flash("USER CREATED")
@@ -146,9 +167,10 @@ def products():
     conn = get_db()
     #om brukeren har logget inn sender den brukerens data sånn at brukeren kan se hva som har skjedd.
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
-
+    image = print(request.form.get('file'))
+    print(image)
     product = request.get_data()
-    print(session.username)
+    product = handle_listdata(product)
     print(product)
     if product:
         print('oi')

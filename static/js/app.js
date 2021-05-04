@@ -164,14 +164,13 @@ async function onRouteChanged() {
             +'</section>'
             +'<div id="userinfo" style="display: none;">'
                 +'<ul>'
-                    +'<li><h3>User: Userfromerik</h3></li>'
-                    +'<li><h3>Tickets: 941</h3></li>'
-                    +'<li><h3>Products: Hus i spania, bil fra romerike</h3></li>'
+                    +'<li><h3 id=currentusername>User: </h3></li>'
+                    +'<li><h3 id=currentusertickets>Tickets: </h3></li>'
                 +'</ul>'
             +'</div>';
 
 
-            //Sjekker at brukeren er logget inn
+            //Checks that the user is actually validated, and gives the user information about its profile
             $.ajax({
                 data: {
                 },
@@ -179,6 +178,10 @@ async function onRouteChanged() {
                 url: "/home"
             })
             .done(function(data){
+                const currentname = data.substring(2, data.indexOf(',')-1);
+                var currentticketcount = data.substring(data.indexOf(',')+3, data.indexOf(']'))
+                document.getElementById('currentusername').innerHTML += `${currentname}`
+                document.getElementById('currentusertickets').innerHTML += `${currentticketcount}`
                 console.log(data)
                 if (data === "\"Redirect\""){
                     return window.location.hash = '/'
@@ -227,9 +230,8 @@ async function onRouteChanged() {
 
             main.innerHTML = '<div id="userinfo" style="display: none;">'
                 +'<ul>'
-                    +'<li><h3>User: Userfromerik</h3></li>'
-                    +'<li><h3>Tickets: 941</h3></li>'
-                    +'<li><h3>Products: Hus i spania, bil fra romerike</h3></li>'
+                    +'<li><h3 id=currentusername>User: </h3></li>'
+                    +'<li><h3 id=currentusertickets>Tickets: </h3></li>'
                 +'</ul>'
             +'</div>';
 
@@ -242,7 +244,7 @@ async function onRouteChanged() {
               +'<br>'
               +'<br>'
               +'<label for="Pname">Choose a product name</label>'
-              +'<input type="text" id="Pname" name="Pname">'
+              +'<input type="text" id="pname" name="pname">'
               +'<br>'
               +'<br>'
               +'<label for="description">Write a fitting description</label>'
@@ -257,6 +259,18 @@ async function onRouteChanged() {
               +'<input type="text" id="date" name="date">'
               +'<br>'
               +'<br>'
+              +'<label for="House" class="checkboxes">Housing<input type="checkbox" id="house" name="check" value="house" class="checkboxes"/>'
+              +'</label>'
+              +'<label for="vehicle" class="checkboxes">Vehicle<input type="checkbox" id="vehicle" name="check" value="vehicle" class="checkboxes"/>'
+              +'</label>'
+              +'<label for="travel" class="checkboxes">Travel<input type="checkbox" id="travel" name="check" value="travel" class="checkboxes"/>'
+              +'</label>'
+              +'<label for="furniture" class="checkboxes">Furniture<input type="checkbox" id="furniture" name="check" value="furniture" class="checkboxes"/>'
+              +'</label>'
+              +'<label for="other" class="checkboxes">Other<input type="checkbox" id="other" name="check" value="other" class="checkboxes"/>'
+              +'</label>'
+              +'<br>'
+              +'<br>'
               +'<br>'
               +'<input type="submit" value="Submit" id="createprod">';
             
@@ -269,8 +283,10 @@ async function onRouteChanged() {
                 url: "/home"
             })
             .done(function(data){
-                const currentname = data.substring(3, data.indexOf(',')-1);
-                console.log(currentname)
+                const currentname = data.substring(2, data.indexOf(',')-1);
+                var currentticketcount = data.substring(data.indexOf(',')+3, data.indexOf(']'))
+                document.getElementById('currentusername').innerHTML += `${currentname}`
+                document.getElementById('currentusertickets').innerHTML += `${currentticketcount}`
                 console.log(data)
                 if (data === "\"Redirect\""){
                     return window.location.hash = '/'
@@ -282,14 +298,19 @@ async function onRouteChanged() {
             // Sender form sånn at brukerens produkt kan lagres i databasen
             $(document).ready(function() {
                 $('form').on('submit', function(event) {
+                    var filter =  []
+                    $.each($("input[name='check']:checked"), function(){
+                        filter.push($(this).val().toString());
+                        });
                     $.ajax({
                         data: {
                             //owner: currentname,
-                            img: $('#file').val(),
-                            Pname: $('#password').val(),
-                            description: $('#description').val(),
-                            mincost: $('#mincost').val(),
-                            date: $('#date').val()
+                            pname: $('#pname').val().toString(),
+                            description: $('#description').val().toString(),
+                            mincost: $('#mincost').val().toString(),
+                            date: $('#date').val().toString(),
+                            filter: filter
+
                         },
                         type: "POST",
                         url: "/products",
@@ -308,6 +329,8 @@ async function onRouteChanged() {
                     event.preventDefault()
                 });
             });
+
+           
 
             function showuser() {
                 var user = document.getElementById('userinfo');

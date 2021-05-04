@@ -20,24 +20,29 @@ def create_connection(db_file):
 
     return conn
 
-sql_create_user_table = """CREATE TABLE IF NOT EXISTS users (
+sql_create_user1_table = """CREATE TABLE IF NOT EXISTS users1 (
                                 username TEXT PRIMARY KEY,
                                 password TEXT,
                                 email TEXT,
-                                tickets INTEGER,
                                 products ID PRIMARYKEY
                             );"""
 
-sql_create_products2_table = """CREATE TABLE IF NOT EXISTS products2 (
-                                id INTEGER,
+sql_create_products4_table = """CREATE TABLE IF NOT EXISTS products4 (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 name TEXT NOT NULL,
                                 img BLOB NOT NULL,
                                 description TEXT,
                                 tickets INTEGER,
                                 mincost INTEGER NOT NULL,
                                 owner TEXT NOT NULL,
-                                Spenders TEXT
+                                Spenders TEXT,
+                                filters text
                             );"""
+
+sql_create_usertickets_table = """CREATE TABLE IF NOT EXISTS usertickets (
+                                username text,
+                                tickets integer
+                                );"""
 
 
 
@@ -63,14 +68,19 @@ def add_user(conn, username,password,email):
     :param username:
     :param password:
     :param email:
-    :param tickets:
     :param products:
     """
-    sql = ''' INSERT INTO users(username,password,email,tickets,products)
-              VALUES(?,?,?,1000,null) '''
+    sql = ''' INSERT INTO users1(username,password,email,products)
+              VALUES(?,?,?,null) '''
+    
+    sql2 = ''' INSERT INTO usertickets(username,tickets)
+                VALUES(?,1000)'''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (username, password, email))
+        cur.execute(sql, (username, password, email,))
+        print("Bruker lagd")
+        cur.execute(sql2, (username,))
+        print("Bruker tickets lagd")
         conn.commit()
         return "User created"
     except Error as e:
@@ -80,7 +90,7 @@ def add_user(conn, username,password,email):
 
 def passwordcheck(conn, username):
     cur = conn.cursor()
-    sql = ("SELECT username,password FROM users WHERE username = ?") 
+    sql = ("SELECT username,password FROM users1 WHERE username = ?") 
     cur.execute(sql, (username,))
     user = []
     for element in cur:
@@ -90,17 +100,26 @@ def passwordcheck(conn, username):
 
 def get_user(conn, username):
     cur = conn.cursor()
-    sql = ("SELECT username,tickets,products FROM users WHERE username = ?")
+    sql = ("SELECT username,products FROM users1 WHERE username = ?")
     cur.execute(sql, (username,))
     user = []
     for element in cur:
         user.append(element)
     return user
 
+def get_user_tickets(conn, username):
+    cur = conn.cursor()
+    sql = ("SELECT tickets FROM usertickets WHERE username = ?")
+    cur.execute(sql, (username,))
+    tickets = []
+    for element in cur:
+        tickets.append(element)
+    return tickets
 
-def add_product(conn, id,name, img,description,tickets, mincost, owner, spenders):
+
+def add_product(conn, name, img,description,tickets, mincost, owner, spenders, filters):
     """
-    Add a new student into the products table
+    Add a new product into the products table
     :param conn:
     :param id:
     :param name:
@@ -110,12 +129,13 @@ def add_product(conn, id,name, img,description,tickets, mincost, owner, spenders
     :param mincost:
     :param owner:
     :param spenders:
+    :param filters:
     """
-    sql = ''' INSERT INTO products1(id,name,img,description,tickets,mincost,owner, spenders)
-              VALUES(?,?,?,?,0,?,?,?) '''
+    sql = ''' INSERT INTO products4(name,img,description,tickets,mincost,owner, spenders, filters)
+              VALUES(?,?,?,0,?,?,?,?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (id,name, img, description, mincost, owner, spenders))
+        cur.execute(sql, (name, img, description, mincost, owner, spenders,filters,))
         conn.commit()
     except Error as e:
         print(e)
@@ -128,8 +148,9 @@ def add_product(conn, id,name, img,description,tickets, mincost, owner, spenders
 def setup():
     conn = create_connection(database)
     if conn is not None:
-        create_table(conn, sql_create_products2_table)
-        create_table(conn, sql_create_user_table)
+        create_table(conn, sql_create_products4_table)
+        create_table(conn, sql_create_user1_table)
+        create_table(conn, sql_create_usertickets_table)
         conn.close()
 
 
