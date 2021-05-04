@@ -237,7 +237,7 @@ async function onRouteChanged() {
             // Setter opp skjema for å lage produkt
             productcreation.innerHTML = '<h1>Create Product</h1>'
             +'<form action="#products" method="POST" enctype="multipart/form-data">'
-              +'<label for="file">Select product image</label>'
+              +'<label for="file">Select product image (MUST BE JPG OR PNG!)</label>'
               +'<input type="file" id="file" name="file">'
               +'<br>'
               +'<br>'
@@ -284,7 +284,7 @@ async function onRouteChanged() {
                 $('form').on('submit', function(event) {
                     $.ajax({
                         data: {
-                            owner: currentname,
+                            //owner: currentname,
                             img: $('#file').val(),
                             Pname: $('#password').val(),
                             description: $('#description').val(),
@@ -325,6 +325,14 @@ async function onRouteChanged() {
         }
 
         default:
+            productcreation.innerHTML = ""
+
+            main.innerHTML = ""
+            
+            links.innerHTML = ""
+
+
+
             app.innerHTML = 'Error 404: No such path exists';
             break;
     }

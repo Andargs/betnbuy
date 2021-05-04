@@ -95,26 +95,6 @@ def home():
             except SyntaxError:
                 pass
     
-    ####################################REGISTER FUNCTIONS######################################################
-    # if data:
-    #     if len(data) > 2:
-    #         usernameregister = escape(data[0])
-    #         emailregister = escape(data[1])
-    #         passwordregister = escape(data[2])
-    #         passwordconf = escape(data[3])
-    #         print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
-    #         if request.method == "POST" and usernameregister is not None:
-    #             if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
-    #                 id = add_user(conn, usernameregister, generate_password_hash(passwordregister), emailregister)
-    #                 if id != -1:
-    #                     flash("USER CREATED")
-    #                     print('USER CREATED')
-    #                 else:
-    #                     flash('Username already taken')
-    #                     print('USERNAME ALREADY TAKEN')
-    #             else:
-    #                 flash("CONFPASS AND PASSWORD NOT ALIKE")
-    
     return app.send_static_file("home.html")
 
 @app.route('/register', methods=['POST'])
@@ -168,8 +148,10 @@ def products():
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
 
     product = request.get_data()
+    print(session.username)
     print(product)
     if product:
+        print('oi')
         return json.dumps('HERREKVELD')
 
     return app.send_static_file('home.html')
