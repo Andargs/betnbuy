@@ -3,8 +3,9 @@ import sqlite3
 from datetime import datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from setup_db import add_user, add_product, setup, passwordcheck, get_user, get_user_tickets
+from setup_db import add_user, add_product, passwordcheck, get_user, get_user_tickets, get_all_products, setup
 import json
+from werkzeug.datastructures import ImmutableMultiDict
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -65,6 +66,14 @@ def handle_listdata(list):
         element = element.replace('%2C', ',')
         element = element.replace('%3A', ':')
         print(element)
+    return list
+
+def handle_binary(binarystring):
+    binarystring = binarystring.split('&')
+    print(binarystring)
+
+
+
 
 
 
@@ -152,9 +161,13 @@ def user():
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
     try:
         if currentuserdata:
-            return json.dumps(currentuserdata)
+            product = get_all_products(conn)
+            print(product)
+            return jsonify(currentuserdata, product)
     except NameError:
         return json.dumps("Redirect")
+
+    
     
 
     
@@ -167,11 +180,13 @@ def products():
     conn = get_db()
     #om brukeren har logget inn sender den brukerens data sånn at brukeren kan se hva som har skjedd.
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
-    image = print(request.form.get('file'))
-    print(image)
     product = request.get_data()
-    product = handle_listdata(product)
+    product = handle_data(product)
     print(product)
+    add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
+    
+    #product = handle_listdata(product)
+    #print(product)
     if product:
         print('oi')
         return json.dumps('HERREKVELD')

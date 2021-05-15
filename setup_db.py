@@ -27,7 +27,7 @@ sql_create_user1_table = """CREATE TABLE IF NOT EXISTS users1 (
                                 products ID PRIMARYKEY
                             );"""
 
-sql_create_products4_table = """CREATE TABLE IF NOT EXISTS products4 (
+sql_create_products5_table = """CREATE TABLE IF NOT EXISTS products5 (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 name TEXT NOT NULL,
                                 img BLOB NOT NULL,
@@ -36,7 +36,8 @@ sql_create_products4_table = """CREATE TABLE IF NOT EXISTS products4 (
                                 mincost INTEGER NOT NULL,
                                 owner TEXT NOT NULL,
                                 Spenders TEXT,
-                                filters text
+                                filters text,
+                                date text
                             );"""
 
 sql_create_usertickets_table = """CREATE TABLE IF NOT EXISTS usertickets (
@@ -116,8 +117,23 @@ def get_user_tickets(conn, username):
         tickets.append(element)
     return tickets
 
+def get_all_products(conn):
+    sql1 = ''' Select id FROM products5;'''
+    cur = conn.cursor()
+    cur.execute(sql1,)
+    products= []
+    for id in cur:
+        id = int(id[0])
+    for i in range(id+1):
+        sql = f''' Select id,name,img,description,tickets,mincost,date FROM products5 WHERE id = {i} ;'''
+        cur = conn.cursor()
+        cur.execute(sql,)
+        for product in cur:
+            products.append(product)
+    return products
 
-def add_product(conn, name, img,description,tickets, mincost, owner, spenders, filters):
+
+def add_product(conn, name, img,description, mincost, owner,date, filters):
     """
     Add a new product into the products table
     :param conn:
@@ -131,14 +147,19 @@ def add_product(conn, name, img,description,tickets, mincost, owner, spenders, f
     :param spenders:
     :param filters:
     """
-    sql = ''' INSERT INTO products4(name,img,description,tickets,mincost,owner, spenders, filters)
-              VALUES(?,?,?,0,?,?,?,?) '''
+    sql = ''' INSERT INTO products5(name,img,description,mincost,owner,date, filters)
+              VALUES(?,?,?,?,?,?,?) '''
     try:
         cur = conn.cursor()
-        cur.execute(sql, (name, img, description, mincost, owner, spenders,filters,))
+        cur.execute(sql, (name, img, description, mincost, owner,date,filters,))
+        print("er her")
         conn.commit()
     except Error as e:
+        print("error")
         print(e)
+
+
+        
 
 
 
@@ -148,7 +169,7 @@ def add_product(conn, name, img,description,tickets, mincost, owner, spenders, f
 def setup():
     conn = create_connection(database)
     if conn is not None:
-        create_table(conn, sql_create_products4_table)
+        create_table(conn, sql_create_products5_table)
         create_table(conn, sql_create_user1_table)
         create_table(conn, sql_create_usertickets_table)
         conn.close()
@@ -156,3 +177,5 @@ def setup():
 
 if __name__ == '__main__':
     setup()
+
+    #################FIX PRODUCTS 5 DB##################

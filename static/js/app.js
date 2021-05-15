@@ -1,5 +1,5 @@
-//spørr om toggling av user data, om hvordan login egentlig skal gjøres, og hvordan man får satt data 
-//fra 2 forskjellige ajax statements sammen. 
+
+
 //Spørr hva som er galt med skjemaet.
 async function onRouteChanged() {
     //Konstanter som henter deler av html siden hvor data skal settes inn for bruk.
@@ -126,11 +126,7 @@ async function onRouteChanged() {
 
             app.innerHTML = "";
 
-            // user.innerHTML = '<ul>'
-            //     +'<li><h3>User: Userfromerik</h3></li>'
-            //     +'<li><h3>Tickets: 941</h3></li>'
-            //     +'<li><h3>Products: Hus i spania, bil fra romerike</h3></li>'
-            // +'</ul>';
+            
             
             productcreation.innerHTML = "";
             
@@ -160,7 +156,6 @@ async function onRouteChanged() {
               +'</label>'
             +'</section>'
             +'<section id="products">'
-            +'<h1>hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh</h1>'
             +'</section>'
             +'<div id="userinfo" style="display: none;">'
                 +'<ul>'
@@ -168,7 +163,6 @@ async function onRouteChanged() {
                     +'<li><h3 id=currentusertickets>Tickets: </h3></li>'
                 +'</ul>'
             +'</div>';
-
 
             //Checks that the user is actually validated, and gives the user information about its profile
             $.ajax({
@@ -178,17 +172,17 @@ async function onRouteChanged() {
                 url: "/home"
             })
             .done(function(data){
-                const currentname = data.substring(2, data.indexOf(',')-1);
-                var currentticketcount = data.substring(data.indexOf(',')+3, data.indexOf(']'))
+                currentname = data[0][0]
+                currentticketcount = data[0][1]
+                console.log(data[0][0])
+                delete data[0]
+                showproducts(data)
                 document.getElementById('currentusername').innerHTML += `${currentname}`
                 document.getElementById('currentusertickets').innerHTML += `${currentticketcount}`
-                console.log(data)
                 if (data === "\"Redirect\""){
                     return window.location.hash = '/'
                 }
-                else {
-                    insertuserdata()
-                }
+                
             });
 
             //Gjør sånn at bruker kan se sine egne data. Tickets, Brukernavn og egne produkter
@@ -203,12 +197,53 @@ async function onRouteChanged() {
                 }
             } 
 
-            function insertuserdata() {
-                null
-            }
+            function showproducts(data){
+                console.log('Er inni produkt funk')
+                products = document.getElementById('products')
+                console.log(data.length)
+                for (i=0; i<data[1].length;i++){
+
+                    function startcountdown(date){
+                        var countdown = new Date(date[1][i][6]).getTime()
+                        var currentdate = new Date().getTime();
+                        var distance = countdown - currentdate;
+                        var days = Math.floor(distance/(1000*60*60*24))
+                        var hours = Math.floor((distance%(1000*60*60*24))/(1000*60*60));
+                        var minutes = Math.floor((distance%(1000*60*60))/(1000*60));
+                        var seconds = Math.floor((distance%(1000*60))/1000);
+                        if (distance < 0){
+                            days = 0
+                            hours = 0
+                            minutes = 0
+                            seconds = 0
+                        }
+                        list = []
+                        list.push(days,hours,minutes,seconds)
+                        return list
+
+                    }
+
+                    countdown = startcountdown(data)
+                    console.log(countdown)
+
+                    
+
+                    
+                    products.innerHTML += `<h1>${data[1][i][1]}</h1><br>`
+                    +`<h2>${data[1][i][2]}</h2>`
+                    +`<br>`
+                    +`<p>${data[1][i][3]}</p>`
+                    +`<h3>${data[1][i][4]}/${data[1][i][5]} tickets</h3>          <h3>${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
+                    +`<br><br>`
+                    +`<input type="number" placeholder="How many tickets to use"><input type="button" value="Submit" id="submittickets"> <br><br>`
+                    if (i == data.length){
+                        products.innerHTML += ``;
+                    }
+                    
+                }
+            };
+
             
-            
-            console.log(currentuser)
 
             
             break;
@@ -238,9 +273,9 @@ async function onRouteChanged() {
 
             // Setter opp skjema for å lage produkt
             productcreation.innerHTML = '<h1>Create Product</h1>'
-            +'<form action="#products" method="POST" enctype="multipart/form-data">'
+            +'<form action="#products" method="POST"  name="prodcre" id="prodcre" enctype="multipart/form-data">'
               +'<label for="file">Select product image (MUST BE JPG OR PNG!)</label>'
-              +'<input type="file" id="file" name="file">'
+              +'<input type="file" id="file" accept="#products"  name="file">'
               +'<br>'
               +'<br>'
               +'<label for="Pname">Choose a product name</label>'
@@ -272,9 +307,9 @@ async function onRouteChanged() {
               +'<br>'
               +'<br>'
               +'<br>'
-              +'<input type="submit" value="Submit" id="createprod">';
+              +'<input type="button" value="Submit" id="createprod">';
             
-
+            document.getElementById('createprod').addEventListener('click',sendprod)
             //Sjekker at brukeren er logget inn og henter ut navn
             $.ajax({
                 data: {
@@ -283,8 +318,10 @@ async function onRouteChanged() {
                 url: "/home"
             })
             .done(function(data){
+                //Splits the string and takes out username and tickets
                 const currentname = data.substring(2, data.indexOf(',')-1);
                 var currentticketcount = data.substring(data.indexOf(',')+3, data.indexOf(']'))
+                // Adds userinfo to the userlogo
                 document.getElementById('currentusername').innerHTML += `${currentname}`
                 document.getElementById('currentusertickets').innerHTML += `${currentticketcount}`
                 console.log(data)
@@ -296,41 +333,140 @@ async function onRouteChanged() {
             
             
             // Sender form sånn at brukerens produkt kan lagres i databasen
-            $(document).ready(function() {
-                $('form').on('submit', function(event) {
-                    var filter =  []
-                    $.each($("input[name='check']:checked"), function(){
-                        filter.push($(this).val().toString());
-                        });
-                    $.ajax({
-                        data: {
-                            //owner: currentname,
-                            pname: $('#pname').val().toString(),
-                            description: $('#description').val().toString(),
-                            mincost: $('#mincost').val().toString(),
-                            date: $('#date').val().toString(),
-                            filter: filter
+            // $(document).ready(function() {
+            //     $('form').on('submit', function(event) {
+            //         // function uploadfile(file) {
+            //         //     var reader = new FileReader();
+            //         //     reader.onloadend = function() {
+            //         //         var data =(reader.result).split(',')[1];
+            //         //         console.log(data)
+            //         //         var img = atob(data)
+            //         //         console.log('BINARY AV BILDE: ', img)
+            //         //         return img
+            //         //     }
+            //         //     return img
+            //         // }
+            //         // var img = uploadfile(document.getElementById('file').files[0])
+            //         var img = function uploadImage(event) {
+            //             const URL = "/products";
+            //             let data = new FormData();
+            //             data.append('name', 'my-img');
+            //             data.append('file', event.target.files[0]);
+            //             return data
+            //         }
+            //         var filter =  []
+            //         $.each($("input[name='check']:checked"), function(){
+            //             filter.push($(this).val().toString());
+            //             });
+            //         $.ajax({
+            //             data: {
+            //                 image: img,
+            //                 pname: $('#pname').val().toString(),
+            //                 description: $('#description').val().toString(),
+            //                 mincost: $('#mincost').val().toString(),
+            //                 date: $('#date').val().toString(),
+            //                 filter: filter
 
-                        },
-                        type: "POST",
-                        url: "/products",
-                        enctype: 'multipart/form-dat'
-                    })
-                    .done(function(data){
-                        console.log('Data sendt')
-                        console.log(data)
-                        if (data !== "\"False\""){
-                            return window.location.reload()
-                        }
-                        else if (data == "\"False\"") {
-                            return window.location.hash = '#home'
-                        }
-                    });
-                    event.preventDefault()
+            //             },
+            //             type: "POST",
+            //             url: "/products",
+            //             enctype: 'multipart/form-dat',
+            //             processData: false,
+            //             contentType: false
+            //         })
+            //         .done(function(data){
+            //             console.log('Data sendt')
+            //             console.log(data)
+            //             if (data !== "\"False\""){
+            //                 return window.location.reload()
+            //             }
+            //             else if (data == "\"False\"") {
+            //                 return window.location.hash = '#home'
+            //             }
+            //         });
+            //         event.preventDefault()
+            //     });
+            // });
+
+            // function formdata() {
+            //     var formdata = new FormData();
+            //     var target = "/products"
+            //     formdata.append("file", document.getElementById("file").files[0]);
+            //     formdata.append("#pname", document.getElementById("#pname").val())
+            //     console.log(formdata)
+            //     console.log("ER I FUNKSJONEN")
+            //     var xhr = XMLHttpRequest();
+            //     var eventsource = xhr.upload || xhr;
+            //     eventsource.addEventListener("progress",function(e){
+            //         var current = e.loaded || e.position;
+            //         var total = e.total || e.totalsize;
+            //         var percent = parseInt((current/total)*100,10);
+            //     });
+            //     xhr.open("POST", target, true);
+            //     xhr.send(formdata)
+            //     xhr.onload = function() {
+            //         if (this.status == 200) {
+            //             return window.location.hash = "#home"
+            //         }
+            //         else {
+            //             return window.location.reload()
+            //         }
+            //     }
+            // }
+
+            async function sendprod(){
+                var pname = document.getElementById('pname').value
+                var description = document.getElementById('description').value
+                var mincost = document.getElementById('mincost').value
+                var date = document.getElementById('date').value
+                var img = document.getElementById('file').files[0]
+                var filter = []
+                if (document.querySelector('#house:checked') !== null){
+                    filter.push("house")
+                }
+                if (document.querySelector('#travel:checked') !== null){
+                    filter.push("travel")
+                }
+                if (document.querySelector('#vehicle:checked') !== null){
+                    filter.push("vehicle")
+                }
+                if (document.querySelector('#other:checked') !== null){
+                    filter.push("other")
+                }
+                if (document.querySelector('#furniture:checked') !== null){
+                    filter.push("furniture")
+                }
+                //var filter = document.getElementById('check').value
+                // var reader = new FileReader();
+                // reader.onload = function(){
+                //     base64string = reader.result.replace("data:", "").replace(/^.+,/, "");
+                //     console.log(base64string)
+                // }
+
+                // img = reader.readAsDataURL(img)
+                // var list = []
+                // list.push(pname,description,mincost,date,img)
+                // var img = function uploadImage(event) {
+                //     let data = new FormData();
+                //     data.append('name', 'my-img');
+                //     data.append('file', event.target.files[0]);
+                //     return data
+                //     }
+                let response = await fetch("/products",{
+                    method: "POST",
+                    headers: {
+                    "Content-Type": "multipart/form-data",
+                    "Content-Transfer-Encoding": "base64"
+                    },
+                    body:"img="+img+"&pname="+pname+"&description="+description+"&mincost="+mincost+"&date="+date+"&filter="+filter
                 });
-            });
+                if (response.status == 200){
+                    let result = await response.text()
+                    console.log(result)
+                }
+            }
 
-           
+            
 
             function showuser() {
                 var user = document.getElementById('userinfo');
@@ -363,6 +499,8 @@ async function onRouteChanged() {
 
 window.addEventListener('hashchange', onRouteChanged);
 window.addEventListener('load', onRouteChanged);
+window.addEventListener('file', onchange);
+window.addEventListener('createprod', onclick);
 
 
 
