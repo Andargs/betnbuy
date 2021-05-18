@@ -172,13 +172,10 @@ async function onRouteChanged() {
                 url: "/home"
             })
             .done(function(data){
-                currentname = data[0][0]
-                currentticketcount = data[0][1]
                 console.log(data[0][0])
-                delete data[0]
                 showproducts(data)
-                document.getElementById('currentusername').innerHTML += `${currentname}`
-                document.getElementById('currentusertickets').innerHTML += `${currentticketcount}`
+                document.getElementById('currentusername').innerHTML += `${data[0][0]}`
+                document.getElementById('currentusertickets').innerHTML += `${data[0][1]}`
                 if (data === "\"Redirect\""){
                     return window.location.hash = '/'
                 }
@@ -211,11 +208,12 @@ async function onRouteChanged() {
                         var hours = Math.floor((distance%(1000*60*60*24))/(1000*60*60));
                         var minutes = Math.floor((distance%(1000*60*60))/(1000*60));
                         var seconds = Math.floor((distance%(1000*60))/1000);
-                        if (distance < 0){
+                        if (distance <= 0){
                             days = 0
                             hours = 0
                             minutes = 0
                             seconds = 0
+                            choose_winner(data[1][i][0],data[1][i][4],data[1][i][5])
                         }
                         list = []
                         list.push(days,hours,minutes,seconds)
@@ -229,23 +227,21 @@ async function onRouteChanged() {
                     
 
                     
-                    products.innerHTML += `<h1>${data[1][i][1]}</h1><br>`
+                    products.innerHTML += `<div id="${data[1][i][0].toString()}">`
+                    +`<h1 id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><br> <button type="button" id="delete + " onclick="delete_product(${data[1][i][0]})">DELETE</button>` 
                     +`<h2>${data[1][i][2]}</h2>`
                     +`<br>`
                     +`<p>${data[1][i][3]}</p>`
                     +`<h3>${data[1][i][4]}/${data[1][i][5]} tickets</h3>          <h3>${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
                     +`<br><br>`
-                    +`<input type="number" placeholder="How many tickets to use"><input type="button" value="Submit" id="submittickets"> <br><br>`
+                    +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets + " onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
+                    +`</div>`;
                     if (i == data.length){
                         products.innerHTML += ``;
                     }
                     
                 }
-            };
-
-            
-
-            
+            }; 
             break;
         }
 
@@ -318,12 +314,9 @@ async function onRouteChanged() {
                 url: "/home"
             })
             .done(function(data){
-                //Splits the string and takes out username and tickets
-                const currentname = data.substring(2, data.indexOf(',')-1);
-                var currentticketcount = data.substring(data.indexOf(',')+3, data.indexOf(']'))
                 // Adds userinfo to the userlogo
-                document.getElementById('currentusername').innerHTML += `${currentname}`
-                document.getElementById('currentusertickets').innerHTML += `${currentticketcount}`
+                document.getElementById('currentusername').innerHTML += `${data[0][0]}`
+                document.getElementById('currentusertickets').innerHTML += `${data[0][1]}`
                 console.log(data)
                 if (data === "\"Redirect\""){
                     return window.location.hash = '/'
@@ -523,6 +516,55 @@ async function getusername() {
 };
 
 
+async function pay_for_prod(productid,sum){
+    sum = document.getElementById(`${sum}`).value
+    console.log(sum)
+    productid = productid
+    let response = await fetch("/payprod",{
+        method: "POST",
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body:"prodid="+productid+"&sum="+sum
+    });
+    if (response.status == 200){
+        let result = await response.text()
+        window.location.reload()
+    }
+};
 
 
+async function delete_product(productid) {
+    let response = await fetch("/deleteprod",{
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: "prodid="+productid
+    });
+    if (response.status == 200) {
+        let result = await response.text()
+        alert(result)
+        window.location.reload()
+    }
+};
 
+async function choose_winner(id, currentticket, mincost){
+    let response = await fetch("/choosewinner", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: "prodid="+id+"&ticketsspent="+currentticket+"&mincost="+mincost
+    });
+    if (response.status == 200) {
+        let result = await response.text()
+        if (result == "\"null\""){
+            document.getElementById(`${id}winner`).innerHTML += `NO WINNER, TICKETS WILL BE RETURNED TO USERS`
+        }
+        else {
+            document.getElementById(`${id}winner`).innerHTML += `         WINNER:${result}`
+        }
+    }
+                
+}

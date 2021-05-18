@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from setup_db import add_user, add_product, passwordcheck, get_user, get_user_tickets, get_all_products, setup
+from setup_db import add_user, add_product, passwordcheck, get_user, get_user_tickets, get_all_products, setup, spend_tickets, delete_prod, pick_winner
 import json
 from werkzeug.datastructures import ImmutableMultiDict
 
@@ -33,6 +33,7 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
+
 #Handles the data and gives it back in a more managable format. 
 def handle_data(string):
     string = str(string)
@@ -44,6 +45,10 @@ def handle_data(string):
         for element in string:
             element=element.split('=')[1]
             fullList.append(element)
+    if len(string) == 3:
+        for element in string:
+            element = element.split('=')[1]
+            fullList.append(element)
     if len(string) == 2:
         for element in string:
             element = element.split('=')[1]
@@ -53,6 +58,13 @@ def handle_data(string):
             element = element.split('=')[1]
             fullList.append(element)
     return fullList
+
+#Handle delete fetch
+def handle_one_element(string):
+    string = str(string)
+    string = string.split('=')[1]
+    string = string.replace('\'','')
+    return string
 
 #handle user input with commas and colons and converts it to actually readable formats
 def handle_listdata(list):
@@ -162,7 +174,6 @@ def user():
     try:
         if currentuserdata:
             product = get_all_products(conn)
-            print(product)
             return jsonify(currentuserdata, product)
     except NameError:
         return json.dumps("Redirect")
@@ -182,16 +193,53 @@ def products():
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
     product = request.get_data()
     product = handle_data(product)
-    print(product)
     add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
     
-    #product = handle_listdata(product)
-    #print(product)
     if product:
         print('oi')
         return json.dumps('HERREKVELD')
 
     return app.send_static_file('home.html')
+
+
+@app.route('/payprod', methods=['POST'])
+def pay():
+    conn = get_db()
+    product = request.get_data()     #Gets the product id and how much money is spent
+    product = handle_data(product) #Turns data into a more managable type
+    product[1] = int(product[1])
+    if currentuserdata[1][0] < product[1]:  #Checks that the user have enough tickets to perform the buy operation
+        return jsonify("You dont have enough tickets to perform this transaction")
+    else:
+        #Applies the changes to the database
+        spend_tickets(conn, currentuserdata[0], product[0], product[1])
+        #Updates the users info about itself
+        tickets = get_user_tickets(conn, currentuserdata[0])
+        currentuserdata[1] = tickets[0]
+        print(tickets)
+        return jsonify("Refresh")
+
+@app.route('/deleteprod', methods=['POST'])
+def delete():
+    conn = get_db()
+    prodid = request.get_data()
+    prodid = handle_one_element(prodid)
+    answer = delete_prod(conn, currentuserdata[0], prodid)
+    if answer == "Right":
+        return jsonify("Product is deleted")
+    elif answer == "Wrong":
+        return jsonify("Product cant be deleted by someone who doesnt own the product")
+
+@app.route('/choosewinner', methods=['POST'])
+def choosewinner():
+    conn = get_db()
+    product = request.get_data()
+    product = handle_data(product)
+    answer = pick_winner(conn,product[0],product[1],product[2], currentuserdata[0])
+    if answer:
+        return jsonify(answer)
+    
+    return "oi"
 
 
 if __name__ == '__main__':
