@@ -48,11 +48,16 @@ async function onRouteChanged() {
                     .done(function(data){
                         console.log('Data sendt')
                         console.log(data)
-                        if (data !== "\"False\""){
-                            return window.location.hash = '#home'
-                        }
-                        else if (data == "\"False\"") {
+                        if (data == "No user by that name"){
+                            alert(data)
                             return window.location.reload()
+                        }
+                        if (data == "Wrong password") {
+                            alert(data)
+                            return window.location.reload()
+                        }
+                        else {
+                            return window.location.hash = '#home'
                         }
                     });
                     event.preventDefault()
@@ -100,7 +105,10 @@ async function onRouteChanged() {
                         url: "/register"
                     })
                     .done(function(data){
-                        
+                        if (data == 'User created'){
+                            return window.location.hash = '#'
+                        }
+                        return alert(data)
                     });
                     event.preventDefault()
                 });
@@ -115,6 +123,7 @@ async function onRouteChanged() {
             //Gjør at brukeren kan navigere siden
             links.innerHTML = '<nav>'
             +'<ul>'
+                +'<li ><i id="logout" class="fa fa-user-times"></i></li>'
                 +'<li><a href="#home"><i class="fa fa-home"></i></a></li>'
                 +'<li ><i id="userlogo" class="fa fa-user"></i></li>'
                 +'<li><a href="#products"><i class="fa fa-shopping-cart"></i></a></li>'
@@ -122,6 +131,7 @@ async function onRouteChanged() {
             +'</nav>';
 
             document.getElementById('userlogo').addEventListener('click',showuser)
+            document.getElementById('logout').addEventListener('click', logout)
 
 
             app.innerHTML = "";
@@ -133,27 +143,28 @@ async function onRouteChanged() {
             //Fyller inn siden med filtrering og produkter
             main.innerHTML = '<section id="filter">'
             +'<h3>Filter Search</h3>'
-            +'<input type="text" placeholder="Search..." name="searchbar" id="searchbar"><br>'
+            +`<input type="text" placeholder="Search..." name="searchbar"  id="searchbar" id="searchbar"><br>`
             +'<br>'
             +'<br>'
-            +'<label for="house" class="checkboxes">Housing<input type="checkbox" id="house" name="house" value="house" class="checkboxes"/>'
+            +`<label for="house" class="checkboxes">Housing<input type="checkbox" id="house" name="house" value="house" class="checkboxes"/>`
               +'</label>'
               +'<br>'
               +'<br>'
-              +'<label for="vehicle" class="checkboxes">Vehicle<input type="checkbox" id="vehicle" name="vehicle" value="vehicle" class="checkboxes"/>'
+              +`<label for="vehicle" class="checkboxes">Vehicle<input type="checkbox" id="vehicle" name="vehicle" value="vehicle" class="checkboxes"/>`
               +'</label>'
               +'<br>'
               +'<br>'
-              +'<label for="travel" class="checkboxes">Travel<input type="checkbox" id="travel" name="travel" value="travel" class="checkboxes"/>'
+              +`<label for="travel" class="checkboxes">Travel<input type="checkbox" id="travel" name="travel" value="travel" class="checkboxes"/>`
               +'</label>'
               +'<br>'
               +'<br>'
-              +'<label for="furniture" class="checkboxes">Furniture<input type="checkbox" id="furniture" name="furniture" value="furniture" class="checkboxes"/>'
+              +`<label for="furniture" class="checkboxes">Furniture<input type="checkbox" id="furniture" name="furniture" value="furniture" class="checkboxes"/>`
               +'</label>'
               +'<br>'
               +'<br>'
-              +'<label for="other" class="checkboxes">Other<input type="checkbox" id="other" name="other" value="other" class="checkboxes"/>'
+              +`<label for="other" class="checkboxes">Other<input type="checkbox" id="other" name="other" value="other" class="checkboxes"/>`
               +'</label>'
+              +`<button id="filterbutton" onclick="filter('searchbar', '#house:checked', '#vehicle:checked', '#travel:checked', '#furniture:checked', '#other:checked')">Filter</button>`
             +'</section>'
             +'<section id="products">'
             +'</section>'
@@ -163,6 +174,7 @@ async function onRouteChanged() {
                     +'<li><h3 id=currentusertickets>Tickets: </h3></li>'
                 +'</ul>'
             +'</div>';
+            document.getElementById('filterbutton').addEventListener('filterbutton', onclick)
 
             //Checks that the user is actually validated, and gives the user information about its profile
             $.ajax({
@@ -172,12 +184,18 @@ async function onRouteChanged() {
                 url: "/home"
             })
             .done(function(data){
+                if (data.length != 2) {
+                    window.location.hash = '#'
+                    window.location.reload()
+                }
                 console.log(data[0][0])
                 showproducts(data)
+                console.log(data[0][0])
                 document.getElementById('currentusername').innerHTML += `${data[0][0]}`
                 document.getElementById('currentusertickets').innerHTML += `${data[0][1]}`
                 if (data === "\"Redirect\""){
-                    return window.location.hash = '/'
+                    window.location.hash = '#'
+                    window.location.reload()
                 }
                 
             });
@@ -192,7 +210,22 @@ async function onRouteChanged() {
                     user.style.display = "none";
                     console.log('romba')
                 }
-            } 
+            }
+
+            async function logout(){
+                let response = await fetch('/logout', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: "Logout"
+                });
+                if (response.status == 200) {
+                    let result = await response.text()
+                    window.location.hash = '#'
+                    window.location.reload()
+            }
+        }
 
             function showproducts(data){
                 console.log('Er inni produkt funk')
@@ -222,22 +255,20 @@ async function onRouteChanged() {
                     }
 
                     countdown = startcountdown(data)
-                    console.log(countdown)
 
-                    
-
-                    
                     products.innerHTML += `<div id="${data[1][i][0].toString()}">`
-                    +`<h1 id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><br> <button type="button" id="delete + " onclick="delete_product(${data[1][i][0]})">DELETE</button>` 
-                    +`<h2>${data[1][i][2]}</h2>`
+                    +`<section id="sideomside">`
+                    +`<h1 id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><button type="button" id="delete" onclick="delete_product(${data[1][i][0]})">DELETE</button>` 
+                    +`</section>`
+                    +`<h2 id="${data[1][i][0].toString()}img">${data[1][i][2]}</h2>`
                     +`<br>`
                     +`<p>${data[1][i][3]}</p>`
                     +`<h3>${data[1][i][4]}/${data[1][i][5]} tickets</h3>          <h3>${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
                     +`<br><br>`
-                    +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets + " onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
+                    +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
                     +`</div>`;
                     if (i == data.length){
-                        products.innerHTML += ``;
+                        console.log('LEGG TIL BILDE')
                     }
                     
                 }
@@ -319,7 +350,7 @@ async function onRouteChanged() {
                 document.getElementById('currentusertickets').innerHTML += `${data[0][1]}`
                 console.log(data)
                 if (data === "\"Redirect\""){
-                    return window.location.hash = '/'
+                    return window.location.hash = '#'
                 }
             });
 
@@ -494,6 +525,8 @@ window.addEventListener('hashchange', onRouteChanged);
 window.addEventListener('load', onRouteChanged);
 window.addEventListener('file', onchange);
 window.addEventListener('createprod', onclick);
+window.addEventListener('filterbutton', onclick)
+
 
 
 
@@ -514,6 +547,105 @@ async function getusername() {
         return null
     }
 };
+
+
+function startcountdownfilter(listelement) {
+    var countdown = new Date(listelement).getTime()
+    var currentdate = new Date().getTime();
+    var distance = countdown - currentdate;
+    var days = Math.floor(distance/(1000*60*60*24))
+    var hours = Math.floor((distance%(1000*60*60*24))/(1000*60*60));
+    var minutes = Math.floor((distance%(1000*60*60))/(1000*60));
+    var seconds = Math.floor((distance%(1000*60))/1000);
+    if (distance <= 0){
+        days = 0
+        hours = 0
+        minutes = 0
+        seconds = 0
+        }
+    list = []
+    list.push(days,hours,minutes,seconds)
+    return list
+
+    }
+
+
+// Filters products based on the users input
+
+async function filter(written, house, vehicle, travel, furniture, other){
+    filter = []
+    writtenchange = document.getElementById(`${written}`).value
+    filter.push(writtenchange)
+    if (writtenchange == ""){
+        filter.push(" ")
+    }
+    if (document.querySelector(`${house}`) !== null){
+        filter.push("house")
+    }
+    if (document.querySelector(`${vehicle}`) !== null){
+        filter.push("travel")
+    }
+    if (document.querySelector(`${travel}`) !== null){
+        filter.push("vehicle")
+    }
+    if (document.querySelector(`${other}`) !== null){
+        filter.push("other")
+    }
+    if (document.querySelector(`${furniture}`) !== null){
+        filter.push("furniture")
+    }
+    let response = await fetch('/filter', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body:"filter="+filter
+    });
+    if (response.status == 200) {
+        let result = await response.json()
+        products = document.getElementById('products')
+        products.innerHTML = ``
+        console.log(result)
+        console.log(result[0])
+        if (result == `No product fits the filter options choosen`){
+            alert(result)
+            return window.location.reload()
+        }
+        if (result[0].length > 3){
+        for (i=0; i<=result.length;i++){
+            countdown = startcountdownfilter(result[i][6])
+            products.innerHTML += `<div id="${result[i][0].toString()}">`
+            +`<h1 id="${result[i][0].toString()}winner">${result[i][1]}</h1><br> <button type="button" id="delete + " onclick="delete_product(${result[i][0]})">DELETE</button>` 
+            +`<h2>${result[i][2]}</h2>`
+            +`<br>`
+            +`<p>${result[i][3]}</p>`
+            +`<h3>${result[i][4]}/${result[i][5]} tickets</h3>          <h3>${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
+            +`<br><br>`
+            +`<input type="number" placeholder="How many tickets to use" id="${result[i][0].toString()}sum"><button type="button" id="submittickets + " onclick="pay_for_prod(${result[i][0]},'${result[i][0].toString()}sum')">Submit</button> <br><br>`
+            +`</div>`;
+
+            window.location.hash = "#home"
+        }
+    }
+        if (result.length >= 1){
+            countdown = startcountdownfilter(result[6])
+            products.innerHTML += `<div id="${result[0].toString()}">`
+            +`<h1 id="${result[0].toString()}winner">${result[1]}</h1><br> <button type="button" id="delete + " onclick="delete_product(${result[0]})">DELETE</button>` 
+            +`<h2>${result[2]}</h2>`
+            +`<br>`
+            +`<p>${result[3]}</p>`
+            +`<h3>${result[4]}/${result[5]} tickets</h3>          <h3>${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
+            +`<br><br>`
+            +`<input type="number" placeholder="How many tickets to use" id="${result[0].toString()}sum"><button type="button" id="submittickets + " onclick="pay_for_prod(${result[0]},'${result[0].toString()}sum')">Submit</button> <br><br>`
+            +`</div>`;
+
+            window.location.hash = "#home"
+        }
+
+    }
+
+
+}
 
 
 async function pay_for_prod(productid,sum){

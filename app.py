@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from setup_db import add_user, add_product, passwordcheck, get_user, get_user_tickets, get_all_products, setup, spend_tickets, delete_prod, pick_winner
+from setup_db import add_user, add_product, filter_product, passwordcheck, get_user, get_user_tickets, get_all_products, setup, spend_tickets, delete_prod, pick_winner,filter_product
 import json
 from werkzeug.datastructures import ImmutableMultiDict
 
@@ -84,6 +84,16 @@ def handle_binary(binarystring):
     binarystring = binarystring.split('&')
     print(binarystring)
 
+def read_img(img):
+    img = bytes(img)
+    with open(f'{img}', 'rb') as file:
+        blob = file.read()
+    return blob
+
+
+def removeuserinfo():
+    global currentuserdata
+    del currentuserdata
 
 
 
@@ -112,27 +122,23 @@ def home():
                         print(useraccesed)
                         if len(useraccesed) <1:
                             flash('User isnt registered, register and try again')
+                            return jsonify('No user by that name')
                         if username == useraccesed[0][0] and check_password_hash(useraccesed[0][1],password):
-                            print("Login approved")
-                            flash('Login approved')
                             session['username'] = username
                             #Creates a global value with the current user, then extracts the username, their products and their tickets
                             global currentuserdata
                             currentuserdata = [username]
                             tickets = get_user_tickets(conn, username)
                             currentuserdata.append(tickets[0])
-                            print(useraccesed[0][0])
                             currentuser = {
                                 "username": useraccesed[0][0],
                             }
                             #print(json.dumps(useraccesed[0][0]))
-                            return json.dumps(currentuser)
+                            return jsonify(currentuser)
                         else:
-                            print("login failed")
-                            flash('Wrong password')
-                            return json.dumps('False')
+                            return jsonify('Wrong password')
                     except SyntaxError:
-                        flash('No users by that name')
+                        return jsonify('No user by that name')
             except SyntaxError:
                 pass
     
@@ -152,17 +158,15 @@ def register():
             passwordconf = escape(data[3])
             print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
             if request.method == "POST" and usernameregister is not None:
-                if len(str(passwordregister)) > 5 and passwordregister == passwordconf:
-                    print("oi")
+                if len(str(passwordregister)) >= 5 and passwordregister == passwordconf:
                     id = add_user(conn, usernameregister, generate_password_hash(passwordregister), emailregister)
                     if id != -1:
-                        flash("USER CREATED")
-                        print('USER CREATED')
+                        return jsonify('User created')
                     else:
-                        flash('Username already taken')
-                        print('USERNAME ALREADY TAKEN')
+                        return jsonify('Username already in use')
                 else:
-                    flash("CONFPASS AND PASSWORD NOT ALIKE")
+                    return jsonify('Password and password confirmation must match, and password must be 5 characters or longer')
+
     
     return app.send_static_file("home.html")
 
@@ -173,15 +177,11 @@ def user():
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
     try:
         if currentuserdata:
-            product = get_all_products(conn)
-            return jsonify(currentuserdata, product)
+            if currentuserdata != None:
+                product = get_all_products(conn)
+                return jsonify(currentuserdata, product)
     except NameError:
         return json.dumps("Redirect")
-
-    
-    
-
-    
     
     return app.send_static_file('home.html')
 
@@ -193,6 +193,9 @@ def products():
     #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
     product = request.get_data()
     product = handle_data(product)
+    product[0] = read_img(product[0])
+    print(type(product[0]))
+    print(product[0])
     add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
     
     if product:
@@ -200,6 +203,22 @@ def products():
         return json.dumps('HERREKVELD')
 
     return app.send_static_file('home.html')
+
+@app.route('/filter', methods=['POST'])
+def filter():
+    conn = get_db()
+    filter = request.get_data()
+    filter = handle_one_element(filter)
+    filterlist = []
+    filterlist.append(filter.split(','))
+    if filter[0][0] == ",":
+        del filterlist[0][0]
+    print(filterlist)
+    productfilter = filter_product(conn, filterlist)
+    if len(productfilter) <= 1:
+        return jsonify("No product fits the filter options choosen")
+    else:
+        return jsonify(productfilter)
 
 
 @app.route('/payprod', methods=['POST'])
@@ -225,7 +244,10 @@ def delete():
     prodid = request.get_data()
     prodid = handle_one_element(prodid)
     answer = delete_prod(conn, currentuserdata[0], prodid)
+    tickets = get_user_tickets(conn, currentuserdata[0])
+    currentuserdata[1] = tickets[0]
     if answer == "Right":
+        #Dont need to update tickets due to this being the users own product
         return jsonify("Product is deleted")
     elif answer == "Wrong":
         return jsonify("Product cant be deleted by someone who doesnt own the product")
@@ -233,13 +255,21 @@ def delete():
 @app.route('/choosewinner', methods=['POST'])
 def choosewinner():
     conn = get_db()
-    product = request.get_data()
-    product = handle_data(product)
-    answer = pick_winner(conn,product[0],product[1],product[2], currentuserdata[0])
+    product = request.get_data()   #Retrieves data
+    product = handle_data(product)  #Manages data
+    answer = pick_winner(conn,product[0],product[1],product[2], currentuserdata[0])  #Checks if the winner can be selected
+    #if a winner can be selected, winner is returned, if not, it returns something that tells the js what to do
+    tickets = get_user_tickets(conn, currentuserdata[0])
+    currentuserdata[1] = tickets[0]
     if answer:
         return jsonify(answer)
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    logout = request.get_data()
+    removeuserinfo()
     
-    return "oi"
+    return "redirect"
 
 
 if __name__ == '__main__':

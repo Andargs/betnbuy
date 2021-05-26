@@ -22,9 +22,6 @@
 </header>
   <body>
     <div id="app">
-      <!-- {% for msg in get_flashed_messages() %}
-      <h1>{{ msg }}</h1>
-      {% endfor %} -->
     </div>
     <div id="productcreation">
 
@@ -88,18 +85,7 @@ header {
     position: sticky;
     top: 0;
 }
-/* header h1{
-    height: 60px;
-    text-indent: 5%;
-    margin-left: 5%;
-    z-index: 5;
-    color: #9400d3;
-    background-color: #FFFFFF;
-    border: solid;
-    border-width: 3px;
-    border-color:#9932cc;
-    width: 10%;
-} */
+
 header nav li{
     display: inline-block;
     vertical-align: top;
@@ -128,13 +114,6 @@ header nav ul{
     height: 10px;
 }
 header img {
-    /* height: 200px;
-    width: 200px;
-    margin-top: -50px;
-    border: solid transparent;
-    border-width: 5px;
-    border-color: #9932cc;
-    z-index: 5; */
     margin-top: -65px;
     border-radius: 50%;
     overflow:hidden;
@@ -172,21 +151,47 @@ body #main #filter {
   border: #9932cc;
 }
 
+body #main #filter button {
+  width: 80%;
+  margin-top: 10%;
+  background-color: #9932cc;
+  color: #FFFFFF;
+}
+body #main #submittickets {
+  width: 30%;
+  margin-top: 2.5%;
+  background-color: #9932cc;
+  color: #FFFFFF;
+}
+
 body #main #products {
   max-width: 60%;
   padding-right: 15%;
+  max-height: 0%;
   padding-left: 15%;
   padding-top: 10%;
   position: absolute;
-    top:  35%;
+    top:  0%;
     left: 40%;
     transform: translate(-50%,-10%);
 
 }
 
+
+
 body #main #products div {
   border: solid;
   border: 5px;
+}
+
+body #main #products div #delete {
+  width: 30%;
+  margin-bottom: 10;
+  position: absolute;
+    left: 100%;
+    margin-bottom: 10%;
+  background-color: #9932cc;
+  color: #FFFFFF;
 }
 
 body #main #products div #submittickets {
@@ -197,6 +202,7 @@ body #main #products div #submittickets {
 
 body #main #products h1 {
   color: #4b0082;
+  font-size: large;
 }
 
 body #main #products h3 {

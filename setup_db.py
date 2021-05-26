@@ -158,6 +158,8 @@ def add_product(conn, name, img,description, mincost, owner,date, filters):
         print(e)
 
 
+##################SPEND TICKETS ON PRODUCTS####################
+
 def spend_tickets(conn,user,prodid,tickets):
     #Extracts the current ticket value
     curhenttickets = conn.cursor()
@@ -240,6 +242,8 @@ def spend_tickets(conn,user,prodid,tickets):
     except Error as e:
         print(e)
 
+###############DELETE PRODUCT#################
+
 def delete_prod(conn, user, prodid):
     cur = conn.cursor()
     try:
@@ -264,6 +268,9 @@ def delete_prod(conn, user, prodid):
             print(e)
     else:
         return "Wrong" #If the owner is not the one who tries to delete, the product will not be deleted
+
+
+##########RETURN TICKETS ON DELETE, OR IF PRODUCT DOESNT HAVE THE NECESSARY TICKETS TO PERFORM SALE##################
 
 def returntickets_ondelete(conn, user,prodid):
     cur = conn.cursor()
@@ -302,6 +309,8 @@ def returntickets_ondelete(conn, user,prodid):
                 print(e)
     except Error as e:
         print(e)
+
+#############PICK WINNER FOR PRODUCT#############
 
 def pick_winner(conn,id,tickets,mincost, user):
     cur = conn.cursor()
@@ -355,7 +364,74 @@ def pick_winner_name(conn, id):
         return winner        #Returns a winner which will be showed on the product
     except Error as e:
         print(e)
-        
+
+
+##############FILTER PRODUCTS################
+
+def filter_product(conn, list):
+    length = len(list[0])
+    productsfilter = []
+    if length == 1:
+        cur = conn.cursor()
+        try:
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?)'
+            cur.execute(sql,(list[0][0],))
+            for element in cur:
+                productsfilter.append(element)
+            return productsfilter
+        except Error as e:
+            print(e)
+    if length == 2:
+        cur = conn.cursor()
+        try:
+            print("Er i lengde 2")
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0;'
+            cur.execute(sql,(str(list[0][0]),str(list[0][1]),))
+            for element in cur:
+                productsfilter.append(element)
+            return productsfilter
+        except Error as e:
+            print(e)
+    if length == 3:
+        cur = conn.cursor()
+        try:
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
+            cur.execute(sql,(list[0][0],list[0][1],list[0][2],))
+            for element in cur:
+                productsfilter.append(element)
+            return productsfilter
+        except Error as e:
+            print(e)
+    if length == 4:
+        cur = conn.cursor()
+        try:
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
+            cur.execute(sql,(list[0][0],list[0][1], list[0][2], list[0][3], ))
+            for element in cur:
+                productsfilter.append(element)
+            return productsfilter
+        except Error as e:
+            print(e)
+    if length == 5:
+        cur = conn.cursor()
+        try:
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
+            cur.execute(sql,(list[0][0],list[0][1], list[0][2], list[0][3],list[0][4], ))
+            for element in cur:
+                productsfilter.append(element)
+            return productsfilter
+        except Error as e:
+            print(e)
+    if length == 6:
+        cur = conn.cursor()
+        try:
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
+            cur.execute(sql,(list[0][0],list[0][1], list[0][2], list[0][3],list[0][4],list[0][5], ))
+            for element in cur:
+                productsfilter.append(element)
+            return productsfilter
+        except Error as e:
+            print(e)
         
 
 ####################BASE SETUP######################
