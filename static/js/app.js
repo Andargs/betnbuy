@@ -130,14 +130,8 @@ async function onRouteChanged() {
             +'</ul>'
             +'</nav>';
 
-            document.getElementById('userlogo').addEventListener('click',showuser)
-            document.getElementById('logout').addEventListener('click', logout)
-
-
             app.innerHTML = "";
 
-            
-            
             productcreation.innerHTML = "";
             
             //Fyller inn siden med filtrering og produkter
@@ -174,7 +168,10 @@ async function onRouteChanged() {
                     +'<li><h3 id=currentusertickets>Tickets: </h3></li>'
                 +'</ul>'
             +'</div>';
+            // Add eventlisteners to run functions properly
             document.getElementById('filterbutton').addEventListener('filterbutton', onclick)
+            document.getElementById('userlogo').addEventListener('click',showuser)
+            document.getElementById('logout').addEventListener('click', logoutconfirmation)
 
             //Checks that the user is actually validated, and gives the user information about its profile
             $.ajax({
@@ -191,6 +188,7 @@ async function onRouteChanged() {
                 console.log(data[0][0])
                 showproducts(data)
                 console.log(data[0][0])
+                //Adds retrievable information the user can look at
                 document.getElementById('currentusername').innerHTML += `${data[0][0]}`
                 document.getElementById('currentusertickets').innerHTML += `${data[0][1]}`
                 if (data === "\"Redirect\""){
@@ -200,7 +198,7 @@ async function onRouteChanged() {
                 
             });
 
-            //Gjør sånn at bruker kan se sine egne data. Tickets, Brukernavn og egne produkter
+            //Hides and shows the users info on click
             function showuser() {
                 var user = document.getElementById('userinfo');
                 if (user.style.display === "none") {
@@ -212,27 +210,14 @@ async function onRouteChanged() {
                 }
             }
 
-            async function logout(){
-                let response = await fetch('/logout', {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: "Logout"
-                });
-                if (response.status == 200) {
-                    let result = await response.text()
-                    window.location.hash = '#'
-                    window.location.reload()
-            }
-        }
 
+            // Shows the products on load
             function showproducts(data){
                 console.log('Er inni produkt funk')
                 products = document.getElementById('products')
                 console.log(data.length)
                 for (i=0; i<data[1].length;i++){
-
+                    //Calculates the time until a winner is choosen
                     function startcountdown(date){
                         var countdown = new Date(date[1][i][6]).getTime()
                         var currentdate = new Date().getTime();
@@ -255,18 +240,19 @@ async function onRouteChanged() {
                     }
 
                     countdown = startcountdown(data)
-
-                    products.innerHTML += `<div id="${data[1][i][0].toString()}">`
+                    //Adds product in html
+                    products.innerHTML += `<div id="${data[1][i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
                     +`<section id="sideomside">`
-                    +`<h1 id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><button type="button" id="delete" onclick="delete_product(${data[1][i][0]})">DELETE</button>` 
+                    +`<h1 style="display:inline-block;" id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><button type="button" id="delete" onclick="delete_product(${data[1][i][0]})" style="display:inline-block;">DELETE</button>` 
                     +`</section>`
                     +`<h2 id="${data[1][i][0].toString()}img">${data[1][i][2]}</h2>`
                     +`<br>`
                     +`<p>${data[1][i][3]}</p>`
-                    +`<h3>${data[1][i][4]}/${data[1][i][5]} tickets</h3>          <h3>${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
+                    +`<h3 style="display:inline-block;">${data[1][i][4]}/${data[1][i][5]} tickets spent</h3>          <h3 style="display:inline-block; margin-left:25%" >Time left: ${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds</h3>`
                     +`<br><br>`
                     +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
-                    +`</div>`;
+                    +`</div>`
+                    +`<br><br>`
                     if (i == data.length){
                         console.log('LEGG TIL BILDE')
                     }
@@ -280,13 +266,12 @@ async function onRouteChanged() {
             // Setter opp navigeringen for brukeren
             links.innerHTML = '<nav>'
             +'<ul>'
+                +'<li ><i id="logout" class="fa fa-user-times"></i></li>'
                 +'<li><a href="#home"><i class="fa fa-home"></i></a></li>'
                 +'<li ><i id="userlogo" class="fa fa-user"></i></li>'
                 +'<li><a href="#products"><i class="fa fa-shopping-cart"></i></a></li>'
             +'</ul>'
             +'</nav>';
-
-            document.getElementById('userlogo').addEventListener('click',showuser)
 
             app.innerHTML = "";
 
@@ -335,8 +320,11 @@ async function onRouteChanged() {
               +'<br>'
               +'<br>'
               +'<input type="button" value="Submit" id="createprod">';
-            
+
+            //Adds eventlisteners
+            document.getElementById('userlogo').addEventListener('click',showuser)
             document.getElementById('createprod').addEventListener('click',sendprod)
+            document.getElementById('logout').addEventListener('click', logoutconfirmation)
             //Sjekker at brukeren er logget inn og henter ut navn
             $.ajax({
                 data: {
@@ -460,7 +448,6 @@ async function onRouteChanged() {
                 if (document.querySelector('#furniture:checked') !== null){
                     filter.push("furniture")
                 }
-                //var filter = document.getElementById('check').value
                 // var reader = new FileReader();
                 // reader.onload = function(){
                 //     base64string = reader.result.replace("data:", "").replace(/^.+,/, "");
@@ -486,7 +473,7 @@ async function onRouteChanged() {
                 });
                 if (response.status == 200){
                     let result = await response.text()
-                    console.log(result)
+                    return window.location.hash = '#home'
                 }
             }
 
@@ -528,6 +515,30 @@ window.addEventListener('createprod', onclick);
 window.addEventListener('filterbutton', onclick)
 
 
+function logoutconfirmation(){
+    let confirmation = confirm("Are you sure you wish to log out?")
+    if (confirmation){
+        logout()
+    }
+}
+
+async function logout(){
+    let confirmation = confirm("Are you sure you want to log out?")
+    if (confirmation) {
+    let response = await fetch('/logout', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: "Logout"
+    });
+    if (response.status == 200) {
+        let result = await response.text()
+        window.location.hash = '#'
+        window.location.reload()
+}
+}
+}
 
 
 async function getusername() {
@@ -536,9 +547,6 @@ async function getusername() {
     if (response.status==200){
         console.log('oi')
         let result = await response.json();
-        //if (currentuser) {
-                        //    window.location.hash = '#home'
-                        //}
         if (result) {
             window.location.hash = '#home'
             console.log(result)
@@ -614,14 +622,16 @@ async function filter(written, house, vehicle, travel, furniture, other){
         if (result[0].length > 3){
         for (i=0; i<=result.length;i++){
             countdown = startcountdownfilter(result[i][6])
-            products.innerHTML += `<div id="${result[i][0].toString()}">`
-            +`<h1 id="${result[i][0].toString()}winner">${result[i][1]}</h1><br> <button type="button" id="delete + " onclick="delete_product(${result[i][0]})">DELETE</button>` 
+            products.innerHTML += `<div id="${result[i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
+            +`<section id="sideomside">`
+            +`<h1 id="${result[i][0].toString()}winner" style="display:inline-block;">${result[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result[i][0]})" style="display:inline-block; margin-bottom:2.5%;">DELETE</button>` 
+            +`</section>`
             +`<h2>${result[i][2]}</h2>`
             +`<br>`
             +`<p>${result[i][3]}</p>`
-            +`<h3>${result[i][4]}/${result[i][5]} tickets</h3>          <h3>${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
+            +`<h3 style="display:inline-block;" >${result[i][4]}/${result[i][5]} tickets</h3>          <h3 style="display:inline-block; margin-left:25%" >${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
             +`<br><br>`
-            +`<input type="number" placeholder="How many tickets to use" id="${result[i][0].toString()}sum"><button type="button" id="submittickets + " onclick="pay_for_prod(${result[i][0]},'${result[i][0].toString()}sum')">Submit</button> <br><br>`
+            +`<input type="number" placeholder="How many tickets to use" id="${result[i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${result[i][0]},'${result[i][0].toString()}sum')">Submit</button> <br><br>`
             +`</div>`;
 
             window.location.hash = "#home"
@@ -629,14 +639,16 @@ async function filter(written, house, vehicle, travel, furniture, other){
     }
         if (result.length >= 1){
             countdown = startcountdownfilter(result[6])
-            products.innerHTML += `<div id="${result[0].toString()}">`
-            +`<h1 id="${result[0].toString()}winner">${result[1]}</h1><br> <button type="button" id="delete + " onclick="delete_product(${result[0]})">DELETE</button>` 
+            products.innerHTML += `<div id="${result[0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
+            +`<section id="sideomside">`
+            +`<h1 id="${result[0].toString()}winner" style="display:inline-block;">${result[1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result[0]})" style="display:inline-block;">DELETE</button>` 
+            +`</section>`
             +`<h2>${result[2]}</h2>`
             +`<br>`
             +`<p>${result[3]}</p>`
-            +`<h3>${result[4]}/${result[5]} tickets</h3>          <h3>${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
+            +`<h3 style="display:inline-block;">${result[4]}/${result[5]} tickets spent</h3>          <h3 style="display:inline-block;>Time Left: ${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
             +`<br><br>`
-            +`<input type="number" placeholder="How many tickets to use" id="${result[0].toString()}sum"><button type="button" id="submittickets + " onclick="pay_for_prod(${result[0]},'${result[0].toString()}sum')">Submit</button> <br><br>`
+            +`<input type="number" placeholder="How many tickets to use" id="${result[0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${result[0]},'${result[0].toString()}sum')">Submit</button> <br><br>`
             +`</div>`;
 
             window.location.hash = "#home"
