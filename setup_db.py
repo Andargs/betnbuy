@@ -5,7 +5,7 @@ import random
 
 database = r"./database.db"
 
-
+#####Establishes a db connection#########
 def create_connection(db_file):
     """ create a database connection to the SQLite database
         specified by db_file
@@ -21,6 +21,8 @@ def create_connection(db_file):
 
     return conn
 
+
+###Base setup with the tables##########
 sql_create_user1_table = """CREATE TABLE IF NOT EXISTS users1 (
                                 username TEXT PRIMARY KEY,
                                 password TEXT,
@@ -28,7 +30,7 @@ sql_create_user1_table = """CREATE TABLE IF NOT EXISTS users1 (
                                 products ID PRIMARYKEY
                             );"""
 
-sql_create_products5_table = """CREATE TABLE IF NOT EXISTS products5 (
+sql_create_products7_table = """CREATE TABLE IF NOT EXISTS products7 (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 name TEXT NOT NULL,
                                 img BLOB NOT NULL,
@@ -38,7 +40,9 @@ sql_create_products5_table = """CREATE TABLE IF NOT EXISTS products5 (
                                 owner TEXT NOT NULL,
                                 Spenders TEXT,
                                 filters text,
-                                date text
+                                date text,
+                                status int,
+                                winner text
                             );"""
 
 sql_create_usertickets_table = """CREATE TABLE IF NOT EXISTS usertickets (
@@ -46,7 +50,7 @@ sql_create_usertickets_table = """CREATE TABLE IF NOT EXISTS usertickets (
                                 tickets integer
                                 );"""
 
-
+############END OF BASE SETUP###############
 
 
 
@@ -62,7 +66,7 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
 
-
+#Adds a user to the database
 def add_user(conn, username,password,email):
     """
     Add a new user into the students table
@@ -89,7 +93,7 @@ def add_user(conn, username,password,email):
         print(e)
         return -1
 
-
+#Checks the password
 def passwordcheck(conn, username):
     cur = conn.cursor()
     sql = ("SELECT username,password FROM users1 WHERE username = ?") 
@@ -100,6 +104,7 @@ def passwordcheck(conn, username):
 
     return user
 
+#Retrieves the user
 def get_user(conn, username):
     cur = conn.cursor()
     sql = ("SELECT username,products FROM users1 WHERE username = ?")
@@ -109,6 +114,8 @@ def get_user(conn, username):
         user.append(element)
     return user
 
+
+#Get the users tickets to make sure updating happens on reload
 def get_user_tickets(conn, username):
     cur = conn.cursor()
     sql = ("SELECT tickets FROM usertickets WHERE username = ?")
@@ -118,22 +125,24 @@ def get_user_tickets(conn, username):
         tickets.append(element)
     return tickets
 
+
+#Return all products to the main page
 def get_all_products(conn):
-    sql1 = ''' Select id FROM products5;'''
+    sql1 = ''' Select id FROM products7;'''
     cur = conn.cursor()
     cur.execute(sql1,)
     products= []
     for id in cur:
         id = int(id[0])
     for i in range(id+1):
-        sql = f''' Select id,name,img,description,tickets,mincost,date FROM products5 WHERE id = {i} ;'''
+        sql = f''' Select id,name,img,description,tickets,mincost,date FROM products7 WHERE id = {i} ;'''
         cur = conn.cursor()
         cur.execute(sql,)
         for product in cur:
             products.append(product)
     return products
 
-
+#Add a product to the database
 def add_product(conn, name, img,description, mincost, owner,date, filters):
     """
     Add a new product into the products table
@@ -148,8 +157,8 @@ def add_product(conn, name, img,description, mincost, owner,date, filters):
     :param spenders:
     :param filters:
     """
-    sql = ''' INSERT INTO products5(name,img,description,mincost,owner,date, filters)
-              VALUES(?,?,?,?,?,?,?) '''
+    sql = ''' INSERT INTO products7(name,img,description,mincost,owner,date, filters, status)
+              VALUES(?,?,?,?,?,?,?,0) '''
     try:
         cur = conn.cursor()
         cur.execute(sql, (name, img, description, mincost, owner,date,filters,))
@@ -163,8 +172,13 @@ def add_product(conn, name, img,description, mincost, owner,date, filters):
 def spend_tickets(conn,user,prodid,tickets):
     #Extracts the current ticket value
     curhenttickets = conn.cursor()
+    status = confirmstatus(conn, prodid)
+    print("Dette er status")
+    print(int(status))
+    if int(status) == 1:
+        return "Sold"
     try:
-        sqlhenttickets = ''' SELECT tickets FROM products5 WHERE id = ? '''
+        sqlhenttickets = ''' SELECT tickets FROM products7 WHERE id = ? '''
         curhenttickets.execute(sqlhenttickets, (prodid,))
         print(curhenttickets)
         currenttickets = []
@@ -185,7 +199,7 @@ def spend_tickets(conn,user,prodid,tickets):
     #Sets the current ticket amount on the product to previous value + what the user spent
     cur = conn.cursor()
     try:
-        sql = ''' UPDATE products5 SET tickets = ? WHERE id = ? LIMIT 1  '''
+        sql = ''' UPDATE products7 SET tickets = ? WHERE id = ? LIMIT 1  '''
         cur.execute(sql, (currenttickets1,prodid,))
         conn.commit()
     except Error as e:
@@ -194,7 +208,7 @@ def spend_tickets(conn,user,prodid,tickets):
     #Finds the current users who spent money on the product
     curfindspenders = conn.cursor()
     try:
-        sqlfindspenders = ''' SELECT spenders FROM products5 WHERE id = ? '''
+        sqlfindspenders = ''' SELECT spenders FROM products7 WHERE id = ? '''
         curfindspenders.execute(sqlfindspenders, (prodid,))
         currentspenders = []
         currentspenders1 = ""
@@ -208,7 +222,7 @@ def spend_tickets(conn,user,prodid,tickets):
     #Inserts the user who spent tickets into the database to make sure the user will be accounted for when choosing winner
     cur1 = conn.cursor()
     try:
-        sql1 = ''' UPDATE products5 SET spenders = ? where id = ? LIMIT 1'''
+        sql1 = ''' UPDATE products7 SET spenders = ? where id = ? LIMIT 1'''
         cur1.execute(sql1, (currentspenders1, prodid, ))
         conn.commit()
     except Error as e:
@@ -246,10 +260,15 @@ def spend_tickets(conn,user,prodid,tickets):
 
 def delete_prod(conn, user, prodid):
     cur = conn.cursor()
+    status = confirmstatus(conn, prodid)
+    print("Dette er status")
+    print(int(status))
+    if int(status) == 1:
+        return "Sold"
     try:
         print(user)
         print(prodid)
-        sql = ''' SELECT owner FROM products5 WHERE id = ? ''' #Checks if the user who wants to delete a product is the owner of the product
+        sql = ''' SELECT owner FROM products7 WHERE id = ? ''' #Checks if the user who wants to delete a product is the owner of the product
         cur.execute(sql, (prodid, ))
         productowner = []
         for element in cur:
@@ -260,7 +279,7 @@ def delete_prod(conn, user, prodid):
         returntickets_ondelete(conn, user,prodid)
         cur1 = conn.cursor()
         try:
-            sql1 = ''' DELETE FROM products5 WHERE id = ?'''
+            sql1 = ''' DELETE FROM products7 WHERE id = ?'''
             cur1.execute(sql1, (prodid,))
             conn.commit()
             return "Right"
@@ -275,7 +294,7 @@ def delete_prod(conn, user, prodid):
 def returntickets_ondelete(conn, user,prodid):
     cur = conn.cursor()
     try:
-        sql = 'SELECT Spenders FROM products5 WHERE id = ?' #Retrieves the users who spent money on the product
+        sql = 'SELECT Spenders FROM products7 WHERE id = ?' #Retrieves the users who spent money on the product
         cur.execute(sql, (prodid,))
         spenders = []
         for element in cur:
@@ -313,17 +332,26 @@ def returntickets_ondelete(conn, user,prodid):
 #############PICK WINNER FOR PRODUCT#############
 
 def pick_winner(conn,id,tickets,mincost, user):
+    status = confirmstatus(conn, id)
+    if int(status) == 1:
+        winner = get_winner(conn, id)
+        return winner
     cur = conn.cursor()
     try:
-        sql = 'SELECT owner FROM products5 WHERE id = ?'  #Retrieves the owner of the product
+        updatestatus(conn,id)
+        sql = 'SELECT owner FROM products7 WHERE id = ?'  #Retrieves the owner of the product
         cur.execute(sql, (id,))
         tickets1 = []
         for element in cur:
             tickets1.append(element)
         if tickets == None or tickets == "null":  #Checks if the product has gotten buyers
             returntickets_ondelete(conn,user,id)
+            winner = "No winner choosen, tickets will be returned to spenders"
+            update_winner(conn, id, winner)
             return "null"
         elif int(tickets) < int(mincost):        #Checks if the product has gotten enough tickets to be sold
+            winner = "No winner choosen, tickets will be returned to spenders"
+            update_winner(conn, id, winner)
             returntickets_ondelete(conn,user,id)
             return "null"
         else:                   #If none of the if statements stops it, the product is approved for picking a winner
@@ -348,10 +376,12 @@ def pick_winner(conn,id,tickets,mincost, user):
     except Error as e:
         print(e)
 
+
+#Picks a winner and sets it to the database
 def pick_winner_name(conn, id):
     cur = conn.cursor()
     try:
-        sql = 'SELECT spenders FROM products5 WHERE id = ?'    #If the product is approved for sale, it will now choose a winner
+        sql = 'SELECT spenders FROM products7 WHERE id = ?'    #If the product is approved for sale, it will now choose a winner
         cur.execute(sql, (id,))
         spenders = []
         for element in cur:
@@ -361,6 +391,8 @@ def pick_winner_name(conn, id):
         spenders = spenders.split(",")
         print(spenders)
         winner = spenders[random.randint(1,len(spenders)-1)]      #The winner is picked at random
+        update_winner(conn, id, winner)    #sets winner in the database
+        updatestatus(conn, id)      #Updates the status to make sure it doesnt choose winner again
         return winner        #Returns a winner which will be showed on the product
     except Error as e:
         print(e)
@@ -371,75 +403,117 @@ def pick_winner_name(conn, id):
 def filter_product(conn, list):
     length = len(list[0])
     productsfilter = []
-    if length == 1:
+    if length == 1:       #If the length of input is one element
         cur = conn.cursor()
         try:
-            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?)'
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products7 WHERE instr(name, ?)'
             cur.execute(sql,(list[0][0],))
             for element in cur:
                 productsfilter.append(element)
             return productsfilter
         except Error as e:
             print(e)
-    if length == 2:
+    if length == 2:       #If the length of input is two elements
         cur = conn.cursor()
         try:
-            print("Er i lengde 2")
-            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0;'
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products7 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0;'
             cur.execute(sql,(str(list[0][0]),str(list[0][1]),))
             for element in cur:
                 productsfilter.append(element)
             return productsfilter
         except Error as e:
             print(e)
-    if length == 3:
+    if length == 3:        #If the length of input is three elements
         cur = conn.cursor()
         try:
-            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products7 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
             cur.execute(sql,(list[0][0],list[0][1],list[0][2],))
             for element in cur:
                 productsfilter.append(element)
             return productsfilter
         except Error as e:
             print(e)
-    if length == 4:
+    if length == 4:         #If the length of input is four elements
         cur = conn.cursor()
         try:
-            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products7 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
             cur.execute(sql,(list[0][0],list[0][1], list[0][2], list[0][3], ))
             for element in cur:
                 productsfilter.append(element)
             return productsfilter
         except Error as e:
             print(e)
-    if length == 5:
+    if length == 5:             #If the length of input is five elements
         cur = conn.cursor()
         try:
-            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products7 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
             cur.execute(sql,(list[0][0],list[0][1], list[0][2], list[0][3],list[0][4], ))
             for element in cur:
                 productsfilter.append(element)
             return productsfilter
         except Error as e:
             print(e)
-    if length == 6:
+    if length == 6:             #If the length of input is six elements
         cur = conn.cursor()
         try:
-            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products5 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products7 WHERE instr(name, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0 AND instr(filters, ?) > 0'
             cur.execute(sql,(list[0][0],list[0][1], list[0][2], list[0][3],list[0][4],list[0][5], ))
             for element in cur:
                 productsfilter.append(element)
             return productsfilter
         except Error as e:
             print(e)
-        
+
+
+#Checks if a winner is choosen previously
+def confirmstatus(conn, id):
+    cur = conn.cursor()
+    try:
+        sql = 'Select status FROM products7 WHERE id = ?'
+        cur.execute(sql, (id, ))
+        for element in cur:
+            return element[0]
+    except Error as e:
+        print(e)
+
+#Updates the status of the product if a winner is already choosen
+def updatestatus(conn, id):
+    cur = conn.cursor()
+    try:
+        sql = 'UPDATE products7 SET status = 1 WHERE id = ? LIMIT 1'
+        cur.execute(sql, (id,))
+        conn.commit()
+    except Error as e:
+        print(e)
+
+#Updates the winner if a winner is choosen
+def update_winner(conn, id, winner):
+    cur = conn.cursor()
+    try:
+        sql = 'UPDATE products7 SET winner = ? WHERE id = ? LIMIT 1'
+        cur.execute(sql, (winner,id,))
+        conn.commit()
+    except Error as e:
+        print(e)
+
+#Gets the winner of a specific product and returns it
+def get_winner(conn, id):
+    cur = conn.cursor()
+    try:
+        sql = 'Select winner FROM products7 WHERE id = ?'
+        cur.execute(sql, (id,))
+        for element in cur:
+            return element[0]
+    except Error as e:
+        print(e)
 
 ####################BASE SETUP######################
+
 
 def setup():
     conn = create_connection(database)
     if conn is not None:
-        create_table(conn, sql_create_products5_table)
+        create_table(conn, sql_create_products7_table)
         create_table(conn, sql_create_user1_table)
         create_table(conn, sql_create_usertickets_table)
         conn.close()

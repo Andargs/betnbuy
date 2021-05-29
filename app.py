@@ -1,11 +1,9 @@
-from flask import Flask, jsonify, render_template, g, request, flash, escape, session, redirect
+from flask import Flask, jsonify, g, request, flash, escape, session
 import sqlite3
-from datetime import datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from setup_db import add_user, add_product, filter_product, passwordcheck, get_user, get_user_tickets, get_all_products, setup, spend_tickets, delete_prod, pick_winner,filter_product
+from setup_db import add_user, add_product, filter_product, passwordcheck,get_user_tickets, get_all_products, spend_tickets, delete_prod, pick_winner,filter_product
 import json
-from werkzeug.datastructures import ImmutableMultiDict
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -16,11 +14,13 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 DATABASE = './database.db'
 
+#Validates login
 def valid_login(username, password):
     if username is not None:
         return check_password_hash(username,password)
     return False
 
+#Gets the database
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -102,7 +102,7 @@ def removeuserinfo():
 
 
 
-
+#Handles login
 @app.route("/", methods=['POST', 'GET'])
 def home():
     #hent db
@@ -121,7 +121,6 @@ def home():
                         useraccesed = passwordcheck(conn, username)
                         print(useraccesed)
                         if len(useraccesed) <1:
-                            flash('User isnt registered, register and try again')
                             return jsonify('No user by that name')
                         if username == useraccesed[0][0] and check_password_hash(useraccesed[0][1],password):
                             session['username'] = username
@@ -144,6 +143,8 @@ def home():
     
     return app.send_static_file("home.html")
 
+
+#Registers users
 @app.route('/register', methods=['POST'])
 def register():
     conn = get_db()
@@ -173,8 +174,8 @@ def register():
 @app.route('/home', methods=['POST'])
 def user():
     conn = get_db()
-    #om brukeren har logget inn sender den brukerens data sånn at brukeren kan se hva som har skjedd.
-    #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
+    #If the user is logged in, this will return the users data to the mainpage along with the products
+    #If the user is not logged in, the page will redirect the user back to the login site.
     try:
         if currentuserdata:
             if currentuserdata != None:
@@ -185,21 +186,18 @@ def user():
     
     return app.send_static_file('home.html')
 
-
+#Adds the product the user created to the main page
 @app.route('/products', methods=['POST'])
 def products():
     conn = get_db()
-    #om brukeren har logget inn sender den brukerens data sånn at brukeren kan se hva som har skjedd.
-    #Hvis brukeren ikke har logget inn vil brukeren bli redirecta tilbake til start
     product = request.get_data()
     product = handle_data(product)
-    product[0] = read_img(product[0])
-    print(type(product[0]))
-    print(product[0])
+    #product[0] = read_img(product[0])
+    #print(type(product[0]))
+    #print(product[0])
     add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
     
     if product:
-        print('oi')
         return json.dumps('HERREKVELD')
 
     return app.send_static_file('home.html')
@@ -227,11 +225,15 @@ def pay():
     product = request.get_data()     #Gets the product id and how much money is spent
     product = handle_data(product) #Turns data into a more managable type
     product[1] = int(product[1])
+    if product[1] < 0:
+        return json.dumps("Cant spend negative tickets")
     if currentuserdata[1][0] < product[1]:  #Checks that the user have enough tickets to perform the buy operation
-        return jsonify("You dont have enough tickets to perform this transaction")
+        return json.dumps("You dont have enough tickets to perform this transaction")
     else:
         #Applies the changes to the database
-        spend_tickets(conn, currentuserdata[0], product[0], product[1])
+        answer = spend_tickets(conn, currentuserdata[0], product[0], product[1])
+        if answer == "Sold":
+            return json.dumps("Cant spend tickets on an already sold item")
         #Updates the users info about itself
         tickets = get_user_tickets(conn, currentuserdata[0])
         currentuserdata[1] = tickets[0]
@@ -240,6 +242,7 @@ def pay():
 
 @app.route('/deleteprod', methods=['POST'])
 def delete():
+    
     conn = get_db()
     prodid = request.get_data()
     prodid = handle_one_element(prodid)
@@ -251,6 +254,8 @@ def delete():
         return jsonify("Product is deleted")
     elif answer == "Wrong":
         return jsonify("Product cant be deleted by someone who doesnt own the product")
+    elif answer == "Sold":
+        return jsonify("Cant delete a product thats already sold")
 
 @app.route('/choosewinner', methods=['POST'])
 def choosewinner():
@@ -262,7 +267,7 @@ def choosewinner():
     tickets = get_user_tickets(conn, currentuserdata[0])
     currentuserdata[1] = tickets[0]
     if answer:
-        return jsonify(answer)
+        return json.dumps(answer)
 
 @app.route('/logout', methods=['POST'])
 def logout():

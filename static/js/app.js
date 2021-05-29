@@ -238,7 +238,7 @@ async function onRouteChanged() {
                         return list
 
                     }
-
+                    image = localStorage.getItem("HER TRENGER JEG produktid")
                     countdown = startcountdown(data)
                     //Adds product in html
                     products.innerHTML += `<div id="${data[1][i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
@@ -253,8 +253,8 @@ async function onRouteChanged() {
                     +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
                     +`</div>`
                     +`<br><br>`
-                    if (i == data.length){
-                        console.log('LEGG TIL BILDE')
+                    if (i+1 == data[1].length){
+                        console.log("legg til bilde")
                     }
                     
                 }
@@ -448,21 +448,8 @@ async function onRouteChanged() {
                 if (document.querySelector('#furniture:checked') !== null){
                     filter.push("furniture")
                 }
-                // var reader = new FileReader();
-                // reader.onload = function(){
-                //     base64string = reader.result.replace("data:", "").replace(/^.+,/, "");
-                //     console.log(base64string)
-                // }
+                //storeimg(img)
 
-                // img = reader.readAsDataURL(img)
-                // var list = []
-                // list.push(pname,description,mincost,date,img)
-                // var img = function uploadImage(event) {
-                //     let data = new FormData();
-                //     data.append('name', 'my-img');
-                //     data.append('file', event.target.files[0]);
-                //     return data
-                //     }
                 let response = await fetch("/products",{
                     method: "POST",
                     headers: {
@@ -519,6 +506,45 @@ function logoutconfirmation(){
     let confirmation = confirm("Are you sure you wish to log out?")
     if (confirmation){
         logout()
+    }
+}
+
+
+// function storeimg(img) {
+//     bannerImage = document.getElementById('file').files[0];
+//     imgData = getBase64Image(bannerImage);
+//     localStorage.setItem("imgData", imgData);  
+// }
+
+// function getBase64Image(img) {
+//     var canvas = document.createElement("canvas");
+//     canvas.width = img.width;
+//     canvas.height = img.height;
+
+//     var ctx = canvas.getContext("2d");
+//     ctx.drawImage(img, 0, 0);
+
+//     var dataURL = canvas.toDataURL("image/png");
+
+//     return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+// }
+
+function storeimg(img){
+    var img1 = new Image();
+    img1.src = img
+    console.log(img)
+    console.log(img1)
+    var imgcanvas = document.createElement("canvas");
+    var imgcontext = imgcanvas.getContext("2d");
+    imgcanvas.width = img1.width
+    imgcanvas.height = img1.height
+    imgcontext.drawImage(img1,0,0,img1.width,img1.height);
+    var imgAsDataURL = imgcanvas.toDataURL("image/png");
+    try {
+        localStorage.setItem("ImgData",imgAsDataURL)
+    }
+    catch (e) {
+        console.log("Upload failed: " + e)
     }
 }
 
@@ -632,7 +658,7 @@ async function filter(written, house, vehicle, travel, furniture, other){
             +`<h3 style="display:inline-block;" >${result[i][4]}/${result[i][5]} tickets</h3>          <h3 style="display:inline-block; margin-left:25%" >${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
             +`<br><br>`
             +`<input type="number" placeholder="How many tickets to use" id="${result[i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${result[i][0]},'${result[i][0].toString()}sum')">Submit</button> <br><br>`
-            +`</div>`;
+            +`</div><br><br>`;
 
             window.location.hash = "#home"
         }
@@ -649,7 +675,7 @@ async function filter(written, house, vehicle, travel, furniture, other){
             +`<h3 style="display:inline-block;">${result[4]}/${result[5]} tickets spent</h3>          <h3 style="display:inline-block;>Time Left: ${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
             +`<br><br>`
             +`<input type="number" placeholder="How many tickets to use" id="${result[0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${result[0]},'${result[0].toString()}sum')">Submit</button> <br><br>`
-            +`</div>`;
+            +`</div><br><br>`;
 
             window.location.hash = "#home"
         }
@@ -673,6 +699,15 @@ async function pay_for_prod(productid,sum){
     });
     if (response.status == 200){
         let result = await response.text()
+        if (result == "\"Cant spend tickets on an already sold item\""){
+            alert(result)
+        }
+        if (result == "\"You dont have enough tickets to perform this transaction\""){
+            alert(result)
+        }
+        if (result == "\"Cant spend negative tickets\""){
+            alert(result)
+        }
         window.location.reload()
     }
 };
@@ -703,11 +738,12 @@ async function choose_winner(id, currentticket, mincost){
     });
     if (response.status == 200) {
         let result = await response.text()
+        console.log(result)
         if (result == "\"null\""){
-            document.getElementById(`${id}winner`).innerHTML += `NO WINNER, TICKETS WILL BE RETURNED TO USERS`
+            document.getElementById(`${id}winner`).innerHTML += `<h2>NO WINNER, TICKETS WILL BE RETURNED TO USERS</h2>`
         }
         else {
-            document.getElementById(`${id}winner`).innerHTML += `         WINNER:${result}`
+            document.getElementById(`${id}winner`).innerHTML += `<h1>WINNER:${result}</h1>`
         }
     }
                 
