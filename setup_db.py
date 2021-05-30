@@ -84,9 +84,7 @@ def add_user(conn, username,password,email):
     try:
         cur = conn.cursor()
         cur.execute(sql, (username, password, email,))
-        print("Bruker lagd")
         cur.execute(sql2, (username,))
-        print("Bruker tickets lagd")
         conn.commit()
         return "User created"
     except Error as e:
@@ -173,8 +171,6 @@ def spend_tickets(conn,user,prodid,tickets):
     #Extracts the current ticket value
     curhenttickets = conn.cursor()
     status = confirmstatus(conn, prodid)
-    print("Dette er status")
-    print(int(status))
     if int(status) == 1:
         return "Sold"
     try:
@@ -261,8 +257,6 @@ def spend_tickets(conn,user,prodid,tickets):
 def delete_prod(conn, user, prodid):
     cur = conn.cursor()
     status = confirmstatus(conn, prodid)
-    print("Dette er status")
-    print(int(status))
     if int(status) == 1:
         return "Sold"
     try:
@@ -316,7 +310,6 @@ def returntickets_ondelete(conn, user,prodid):
             ticket = []
             for elements in cur1:
                 ticket.append(elements)
-            print(ticket)
             current_ticket_count = int(ticket[0][0])
             current_ticket_count += 1
             cur2 = conn.cursor()
@@ -389,7 +382,6 @@ def pick_winner_name(conn, id):
         spenders = spenders[0]
         spenders = str(spenders)
         spenders = spenders.split(",")
-        print(spenders)
         winner = spenders[random.randint(1,len(spenders)-1)]      #The winner is picked at random
         update_winner(conn, id, winner)    #sets winner in the database
         updatestatus(conn, id)      #Updates the status to make sure it doesnt choose winner again
@@ -507,6 +499,17 @@ def get_winner(conn, id):
     except Error as e:
         print(e)
 
+#Gets the new soon to be product id, and adds it to image to make sure each product gets their respective image
+def get_id(conn):
+    cur = conn.cursor()
+    try:
+        sql = 'SELECT MAX(id) FROM products7'
+        cur.execute(sql,)
+        for element in cur:
+            return element[0]
+    except Error as e:
+        print(e)
+
 ####################BASE SETUP######################
 
 
@@ -516,7 +519,14 @@ def setup():
         create_table(conn, sql_create_products7_table)
         create_table(conn, sql_create_user1_table)
         create_table(conn, sql_create_usertickets_table)
-        conn.close()
+        #conn.close()
+    cur = conn.cursor()
+    try:
+        sql = 'DELETE FROM products7 WHERE id > 23'
+        cur.execute(sql,)
+        conn.commit()
+    except Error as e:
+        print(e)
 
 
 if __name__ == '__main__':

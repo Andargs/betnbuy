@@ -16,7 +16,7 @@ async function onRouteChanged() {
     switch (hash) {
         case '':
         case '/': {
-
+            //////////////HTML////////////////////
             //Setter opp skjema for login
             app.innerHTML = '<h1><a href=""></a><i class="fa fa-user-circle" style="font-size: 3em"></i></h1>'
             +'<h1 id="overskrift"> Login </h1>'
@@ -33,7 +33,7 @@ async function onRouteChanged() {
             +'<br>'
             +'<a href="#register" id="refern">Register user</a>'
             +'</form>';
-
+            /////////////FUNCTIONS///////////
             //Sender data til backend for login
             $(document).ready(function() {
                 $('form').on('submit', function(event) {
@@ -46,8 +46,6 @@ async function onRouteChanged() {
                         url: "/"
                     })
                     .done(function(data){
-                        console.log('Data sendt')
-                        console.log(data)
                         if (data == "No user by that name"){
                             alert(data)
                             return window.location.reload()
@@ -70,7 +68,7 @@ async function onRouteChanged() {
         case '#register': {
             
             links.innerHTML = "";
-
+            ////////////////////HTML////////////////////////
             //Setter inn skjema så brukeren kan opprette bruker
             app.innerHTML = '<h1><a href=""></a><i class="fa fa-user-plus" style="font-size: 3em"></i></h1>'
             +'<h1 id="overskriftreg"> Register User </h1>'
@@ -90,7 +88,7 @@ async function onRouteChanged() {
             +'<input type="submit" value="Register" id="register">'
             +'</form>';
             
-
+            //////////////////////FUNCTIONS//////////////////////
             //Gjør at brukeren kan opprette bruker og sender data til backend så registrering kan gjennomføres
             $(document).ready(function() {
                 $('form').on('submit', function(event) {
@@ -119,8 +117,8 @@ async function onRouteChanged() {
         
 
         case '#home': {
-
-            //Gjør at brukeren kan navigere siden
+            ////////////////////////HTML///////////////////////
+            //Enables navigation
             links.innerHTML = '<nav>'
             +'<ul>'
                 +'<li ><i id="logout" class="fa fa-user-times"></i></li>'
@@ -158,7 +156,16 @@ async function onRouteChanged() {
               +'<br>'
               +`<label for="other" class="checkboxes">Other<input type="checkbox" id="other" name="other" value="other" class="checkboxes"/>`
               +'</label>'
-              +`<button id="filterbutton" onclick="filter('searchbar', '#house:checked', '#vehicle:checked', '#travel:checked', '#furniture:checked', '#other:checked')">Filter</button>`
+              +`<br>`
+              +`<br>`
+              +`<h3>Sort by</h3>`
+              +`<label for="Alphabetically" class="checkboxes">Alphabetically<input type="checkbox" id="Alphabetically" name="Alphabetically" value="Alphabetically" class="checkboxes"/>`
+              +'</label>'
+              +`<br>`
+              +`<br>`
+              +`<label for="Ticket-Value" class="checkboxes">Ticket Value<input type="checkbox" id="Ticket-Value" name="Ticket-Value" value="Ticket-Value" class="checkboxes"/>`
+              +'</label>'
+              +`<button id="filterbutton" onclick="filter('searchbar', '#house:checked', '#vehicle:checked', '#travel:checked', '#furniture:checked', '#other:checked', '#Alphabetically:checked','#Ticket-Value:checked')">Filter</button>`
             +'</section>'
             +'<section id="products">'
             +'</section>'
@@ -168,11 +175,15 @@ async function onRouteChanged() {
                     +'<li><h3 id=currentusertickets>Tickets: </h3></li>'
                 +'</ul>'
             +'</div>';
+
+            ///////////////////EVENT LISTENERS/////////////////
             // Add eventlisteners to run functions properly
             document.getElementById('filterbutton').addEventListener('filterbutton', onclick)
             document.getElementById('userlogo').addEventListener('click',showuser)
             document.getElementById('logout').addEventListener('click', logoutconfirmation)
+            document.getElementById('filterbutton').addEventListener('click',filter)
 
+            //////////////////FUNCTIONS////////////////////
             //Checks that the user is actually validated, and gives the user information about its profile
             $.ajax({
                 data: {
@@ -185,9 +196,7 @@ async function onRouteChanged() {
                     window.location.hash = '#'
                     window.location.reload()
                 }
-                console.log(data[0][0])
                 showproducts(data)
-                console.log(data[0][0])
                 //Adds retrievable information the user can look at
                 document.getElementById('currentusername').innerHTML += `${data[0][0]}`
                 document.getElementById('currentusertickets').innerHTML += `${data[0][1]}`
@@ -202,20 +211,16 @@ async function onRouteChanged() {
             function showuser() {
                 var user = document.getElementById('userinfo');
                 if (user.style.display === "none") {
-                    console.log('oi')
                     user.style.display = "block";
                 } else {
                     user.style.display = "none";
-                    console.log('romba')
                 }
             }
 
 
             // Shows the products on load
             function showproducts(data){
-                console.log('Er inni produkt funk')
                 products = document.getElementById('products')
-                console.log(data.length)
                 for (i=0; i<data[1].length;i++){
                     //Calculates the time until a winner is choosen
                     function startcountdown(date){
@@ -238,6 +243,7 @@ async function onRouteChanged() {
                         return list
 
                     }
+                    //////////////Adds products in the html
                     image = localStorage.getItem("HER TRENGER JEG produktid")
                     countdown = startcountdown(data)
                     //Adds product in html
@@ -263,6 +269,7 @@ async function onRouteChanged() {
         }
 
         case '#products':  {
+            //////////////////HTML/////////////////
             // Setter opp navigeringen for brukeren
             links.innerHTML = '<nav>'
             +'<ul>'
@@ -321,10 +328,14 @@ async function onRouteChanged() {
               +'<br>'
               +'<input type="button" value="Submit" id="createprod">';
 
+            ///////////////EVENT LISTENERS//////////////////
             //Adds eventlisteners
             document.getElementById('userlogo').addEventListener('click',showuser)
             document.getElementById('createprod').addEventListener('click',sendprod)
             document.getElementById('logout').addEventListener('click', logoutconfirmation)
+            document.getElementById('file').addEventListener('change', sendimg)
+
+            //////////////FUNCTIONS////////////////
             //Sjekker at brukeren er logget inn og henter ut navn
             $.ajax({
                 data: {
@@ -336,96 +347,12 @@ async function onRouteChanged() {
                 // Adds userinfo to the userlogo
                 document.getElementById('currentusername').innerHTML += `${data[0][0]}`
                 document.getElementById('currentusertickets').innerHTML += `${data[0][1]}`
-                console.log(data)
                 if (data === "\"Redirect\""){
                     return window.location.hash = '#'
                 }
             });
 
-            
-            
-            // Sender form sånn at brukerens produkt kan lagres i databasen
-            // $(document).ready(function() {
-            //     $('form').on('submit', function(event) {
-            //         // function uploadfile(file) {
-            //         //     var reader = new FileReader();
-            //         //     reader.onloadend = function() {
-            //         //         var data =(reader.result).split(',')[1];
-            //         //         console.log(data)
-            //         //         var img = atob(data)
-            //         //         console.log('BINARY AV BILDE: ', img)
-            //         //         return img
-            //         //     }
-            //         //     return img
-            //         // }
-            //         // var img = uploadfile(document.getElementById('file').files[0])
-            //         var img = function uploadImage(event) {
-            //             const URL = "/products";
-            //             let data = new FormData();
-            //             data.append('name', 'my-img');
-            //             data.append('file', event.target.files[0]);
-            //             return data
-            //         }
-            //         var filter =  []
-            //         $.each($("input[name='check']:checked"), function(){
-            //             filter.push($(this).val().toString());
-            //             });
-            //         $.ajax({
-            //             data: {
-            //                 image: img,
-            //                 pname: $('#pname').val().toString(),
-            //                 description: $('#description').val().toString(),
-            //                 mincost: $('#mincost').val().toString(),
-            //                 date: $('#date').val().toString(),
-            //                 filter: filter
-
-            //             },
-            //             type: "POST",
-            //             url: "/products",
-            //             enctype: 'multipart/form-dat',
-            //             processData: false,
-            //             contentType: false
-            //         })
-            //         .done(function(data){
-            //             console.log('Data sendt')
-            //             console.log(data)
-            //             if (data !== "\"False\""){
-            //                 return window.location.reload()
-            //             }
-            //             else if (data == "\"False\"") {
-            //                 return window.location.hash = '#home'
-            //             }
-            //         });
-            //         event.preventDefault()
-            //     });
-            // });
-
-            // function formdata() {
-            //     var formdata = new FormData();
-            //     var target = "/products"
-            //     formdata.append("file", document.getElementById("file").files[0]);
-            //     formdata.append("#pname", document.getElementById("#pname").val())
-            //     console.log(formdata)
-            //     console.log("ER I FUNKSJONEN")
-            //     var xhr = XMLHttpRequest();
-            //     var eventsource = xhr.upload || xhr;
-            //     eventsource.addEventListener("progress",function(e){
-            //         var current = e.loaded || e.position;
-            //         var total = e.total || e.totalsize;
-            //         var percent = parseInt((current/total)*100,10);
-            //     });
-            //     xhr.open("POST", target, true);
-            //     xhr.send(formdata)
-            //     xhr.onload = function() {
-            //         if (this.status == 200) {
-            //             return window.location.hash = "#home"
-            //         }
-            //         else {
-            //             return window.location.reload()
-            //         }
-            //     }
-            // }
-
+            // Adds products to the database
             async function sendprod(){
                 var pname = document.getElementById('pname').value
                 var description = document.getElementById('description').value
@@ -469,11 +396,9 @@ async function onRouteChanged() {
             function showuser() {
                 var user = document.getElementById('userinfo');
                 if (user.style.display === "none") {
-                    console.log('oi')
                     user.style.display = "block";
                 } else {
                     user.style.display = "none";
-                    console.log('romba')
                 }
             } 
 
@@ -494,7 +419,7 @@ async function onRouteChanged() {
             break;
     }
 }
-
+/////////EVENT LISTENERS//////////////
 window.addEventListener('hashchange', onRouteChanged);
 window.addEventListener('load', onRouteChanged);
 window.addEventListener('file', onchange);
@@ -502,6 +427,7 @@ window.addEventListener('createprod', onclick);
 window.addEventListener('filterbutton', onclick)
 
 
+//Checks if the user meant to logout, if they wanted to, runs the actual logout function
 function logoutconfirmation(){
     let confirmation = confirm("Are you sure you wish to log out?")
     if (confirmation){
@@ -510,44 +436,21 @@ function logoutconfirmation(){
 }
 
 
-// function storeimg(img) {
-//     bannerImage = document.getElementById('file').files[0];
-//     imgData = getBase64Image(bannerImage);
-//     localStorage.setItem("imgData", imgData);  
-// }
-
-// function getBase64Image(img) {
-//     var canvas = document.createElement("canvas");
-//     canvas.width = img.width;
-//     canvas.height = img.height;
-
-//     var ctx = canvas.getContext("2d");
-//     ctx.drawImage(img, 0, 0);
-
-//     var dataURL = canvas.toDataURL("image/png");
-
-//     return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
-// }
-
-function storeimg(img){
-    var img1 = new Image();
-    img1.src = img
-    console.log(img)
-    console.log(img1)
-    var imgcanvas = document.createElement("canvas");
-    var imgcontext = imgcanvas.getContext("2d");
-    imgcanvas.width = img1.width
-    imgcanvas.height = img1.height
-    imgcontext.drawImage(img1,0,0,img1.width,img1.height);
-    var imgAsDataURL = imgcanvas.toDataURL("image/png");
-    try {
-        localStorage.setItem("ImgData",imgAsDataURL)
-    }
-    catch (e) {
-        console.log("Upload failed: " + e)
-    }
+async function sendimg(){
+    img = document.getElementById('file').files[0]
+    let response = await fetch('/imageprocessing', {
+        method: "POST",
+        header:{
+            'content-type': 'image/png'
+        },
+        body: img
+    });
+    if (response.status == 200) {
+        let result = await response.text()
+}
 }
 
+//Logs the user out and returns them to the login page
 async function logout(){
     let confirmation = confirm("Are you sure you want to log out?")
     if (confirmation) {
@@ -566,23 +469,7 @@ async function logout(){
 }
 }
 
-
-async function getusername() {
-    
-    let response = await fetch('/');
-    if (response.status==200){
-        console.log('oi')
-        let result = await response.json();
-        if (result) {
-            window.location.hash = '#home'
-            console.log(result)
-            return result
-        }
-        return null
-    }
-};
-
-
+//Initiates the countdown for filtered products
 function startcountdownfilter(listelement) {
     var countdown = new Date(listelement).getTime()
     var currentdate = new Date().getTime();
@@ -604,10 +491,11 @@ function startcountdownfilter(listelement) {
     }
 
 
-// Filters products based on the users input
 
-async function filter(written, house, vehicle, travel, furniture, other){
+// Filters products based on the users input
+async function filter(written, house, vehicle, travel, furniture, other,Alphabetically,ticketvalue){
     filter = []
+    //Filter part
     writtenchange = document.getElementById(`${written}`).value
     filter.push(writtenchange)
     if (writtenchange == ""){
@@ -639,14 +527,42 @@ async function filter(written, house, vehicle, travel, furniture, other){
         let result = await response.json()
         products = document.getElementById('products')
         products.innerHTML = ``
-        console.log(result)
-        console.log(result[0])
         if (result == `No product fits the filter options choosen`){
             alert(result)
             return window.location.reload()
         }
-        if (result[0].length > 3){
-        for (i=0; i<=result.length;i++){
+        //Sort part
+        sort = []
+        if (document.querySelector(`${Alphabetically}`) !== null){
+            sort.push("Alpha")
+        }
+        if (document.querySelector(`${ticketvalue}`) !== null){
+            sort.push("ticket")
+        }
+        if (result[0].length >= 1){
+            if (sort.length > 1){
+                alert("You can only sort by one metric")
+                window.location.reload()
+            }
+        if (sort.length == 1) {
+            let result2 = sorted(result,sort[0])
+            for (i=0; i<=result2.length-1;i++){
+                countdown = startcountdownfilter(result2[i][6])
+                products.innerHTML += `<div id="${result2[i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
+                +`<section id="sideomside">`
+                +`<h1 id="${result[i][0].toString()}winner" style="display:inline-block;">${result2[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result2[i][0]})" style="display:inline-block; margin-bottom:2.5%;">DELETE</button>` 
+                +`</section>`
+                +`<h2>${result2[i][2]}</h2>`
+                +`<br>`
+                +`<p>${result2[i][3]}</p>`
+                +`<h3 style="display:inline-block;" >${result2[i][4]}/${result2[i][5]} tickets</h3>          <h3 style="display:inline-block; margin-left:25%" >${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
+                +`<br><br>`
+                +`<input type="number" placeholder="How many tickets to use" id="${result2[i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${result2[i][0]},'${result2[i][0].toString()}sum')">Submit</button> <br><br>`
+                +`</div><br><br>`;
+            }
+        }
+        else {
+        for (i=0; i<=result.length-1;i++){
             countdown = startcountdownfilter(result[i][6])
             products.innerHTML += `<div id="${result[i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
             +`<section id="sideomside">`
@@ -659,36 +575,45 @@ async function filter(written, house, vehicle, travel, furniture, other){
             +`<br><br>`
             +`<input type="number" placeholder="How many tickets to use" id="${result[i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${result[i][0]},'${result[i][0].toString()}sum')">Submit</button> <br><br>`
             +`</div><br><br>`;
-
-            window.location.hash = "#home"
+        }
         }
     }
-        if (result.length >= 1){
-            countdown = startcountdownfilter(result[6])
-            products.innerHTML += `<div id="${result[0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
-            +`<section id="sideomside">`
-            +`<h1 id="${result[0].toString()}winner" style="display:inline-block;">${result[1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result[0]})" style="display:inline-block;">DELETE</button>` 
-            +`</section>`
-            +`<h2>${result[2]}</h2>`
-            +`<br>`
-            +`<p>${result[3]}</p>`
-            +`<h3 style="display:inline-block;">${result[4]}/${result[5]} tickets spent</h3>          <h3 style="display:inline-block;>Time Left: ${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
-            +`<br><br>`
-            +`<input type="number" placeholder="How many tickets to use" id="${result[0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${result[0]},'${result[0].toString()}sum')">Submit</button> <br><br>`
-            +`</div><br><br>`;
-
-            window.location.hash = "#home"
-        }
-
     }
 
 
 }
 
 
+function sorted(list, value){
+    console.log(value)
+    if (value == "Alpha"){
+        console.log("Er i alpha")
+        //Sorter alfabetisk.      [i][1] == navn
+        list.sort(function(a,b){
+            if (a[1] < b[1]) {
+                return -1;
+            }
+            if (a[1] > b[1]) {
+                return 1;
+            }
+        });
+    }
+    if (value == "ticket") {
+        console.log("Er i ticket")
+        //Sorter etter ticketcount.  [i][4] == ticketcount
+        list.sort(function(a,b){
+            return (a[4]===null)-(b[4]===null) || +(a[4]<b[4])||-(a[4]>b[4]);
+        });
+        }
+        console.log(list)
+        return list
+
+        }
+
+
+//Takes in the amount the user paid for which product and sends it to backend for checks and commits.
 async function pay_for_prod(productid,sum){
     sum = document.getElementById(`${sum}`).value
-    console.log(sum)
     productid = productid
     let response = await fetch("/payprod",{
         method: "POST",
@@ -712,7 +637,7 @@ async function pay_for_prod(productid,sum){
     }
 };
 
-
+//Retrieves the product the user wants to delete, and checks if they have the proper authourization.
 async function delete_product(productid) {
     let response = await fetch("/deleteprod",{
         method: "POST",
@@ -728,6 +653,8 @@ async function delete_product(productid) {
     }
 };
 
+//When the timer for a product is done, this will send the id and current ticketcount + mincost, to see if a winner can be choosen, and which it will be.
+//Afterwards it writes the winner into the product, if no winner is chosen, it writes it in the product.
 async function choose_winner(id, currentticket, mincost){
     let response = await fetch("/choosewinner", {
         method: "POST",
@@ -738,7 +665,6 @@ async function choose_winner(id, currentticket, mincost){
     });
     if (response.status == 200) {
         let result = await response.text()
-        console.log(result)
         if (result == "\"null\""){
             document.getElementById(`${id}winner`).innerHTML += `<h2>NO WINNER, TICKETS WILL BE RETURNED TO USERS</h2>`
         }

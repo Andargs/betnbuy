@@ -1,3 +1,5 @@
+Site uses jquery and ajax, but jquery is only used 4 times and isnt very complicated.
+
 -Main functionality of page
     -The page functions mainly like a auctioning site, except in this case, the winner is selected randomly among the people who spent a ticket on the product. If the product doesnt reach the minimum cost selected by the creator of the product, the product will not be sold, and all tickets will be returned to the users who spent money on tickets for the product.
     Every ticket spent will increase the users chance of winning the product.
@@ -13,9 +15,10 @@
     -If the registration fails, the user will get a pop up box explaining the error, and lets the user try again
 
 -home page
-    -logo in the top corner will return the user to the login page
+    -logo in the top left corner will return the user to the login page
     -Filter
         -Filtering allowes the user to filter based upon the name of the product, and what genre they fit in
+        -Beneath the filter options, there are 2 options for sorting, there the user can either sort the products by highest ticketcount spent, or alphabetically
     -products
         -Every product has its own delete button which will delete the product
             -On delete all the tickets spent on the product will be returned to the users who spent money on it
@@ -33,7 +36,17 @@
             -if the user tries to use a negative sum, an error will be returned
             -If none of these checks fail, the product will get the tickets spent added to its ticketcount, and the user who spent them will be added x(how many tickets they spent) times to the spenders attribute of the table.
         -icons in the top right
-            -The shopping cart will give the users the ability to create their own product
-            -Clicking the user logo will show the user what their username is, along with their current ticketcount
+            -The shopping cart will give the users the ability to create their own product on the products page
+            -Clicking the user logo will display the user what their username is, along with their current ticketcount
             -The home logo will return the user to the main page(#home) where the new product will be shown
             -The userlogo with an x will logout the user, but first ask if they want to be logged out.
+
+-Products
+    -Allowes the user to create a product
+    -The data the users add will be shown on the #home page after a succsessfull commit
+    -The user will be rerouted to #home after a succsessfull commit
+    -Icons in the top right
+        -The shopping cart will give the users the ability to create their own product on the products page
+        -Clicking the user logo will display the user what their username is, along with their current ticketcount
+        -The home logo will return the user to the main page(#home) where the new product will be shown
+        -The userlogo with an x will logout the user, but first ask if they want to be logged out.

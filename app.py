@@ -1,12 +1,22 @@
-from flask import Flask, jsonify, g, request, flash, escape, session
+from flask import Flask, jsonify, g, request, escape, session
 import sqlite3
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from setup_db import add_user, add_product, filter_product, passwordcheck,get_user_tickets, get_all_products, spend_tickets, delete_prod, pick_winner,filter_product
+from setup_db import add_user, add_product, filter_product, passwordcheck,get_user_tickets, get_all_products, spend_tickets, delete_prod, pick_winner,filter_product, get_id
 import json
+from werkzeug.utils import secure_filename
+import os
+import io
+import PIL.Image as Image
+from array import array
+from subprocess import Popen, PIPE
+
+UPLOAD_FOLDER = 'static/images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'ext', 'txt'}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config['./static/images/'] = UPLOAD_FOLDER
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
@@ -85,15 +95,18 @@ def handle_binary(binarystring):
     print(binarystring)
 
 def read_img(img):
-    img = bytes(img)
-    with open(f'{img}', 'rb') as file:
-        blob = file.read()
-    return blob
+    #count = os.stat(img).st_size / 2
+    with open(img, "rb") as f:
+        return bytearray(f.read())
 
 
 def removeuserinfo():
     global currentuserdata
     del currentuserdata
+
+def removeimg():
+    global img
+    del img
 
 
 
@@ -192,15 +205,34 @@ def products():
     conn = get_db()
     product = request.get_data()
     product = handle_data(product)
-    #product[0] = read_img(product[0])
-    #print(type(product[0]))
-    #print(product[0])
     add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
+    #removeimg()
     
     if product:
         return json.dumps('HERREKVELD')
 
     return app.send_static_file('home.html')
+
+@app.route('/imageprocessing', methods=['POST'])
+def imageproc():
+    conn = get_db()
+    # global img
+    # img = request.get_data()
+    # img = Image.open(io.BytesIO(img))
+    # id = get_id(conn)
+    # #Due to the product not being in the database yet, i have to get the id + 1
+    # id = int(id)+1
+    # if img:
+    #     id = str(id)
+    #     navn = f"{id}img"
+    #     filename = secure_filename('png')
+    #     base_path = os.path.abspath(os.path.dirname(__file__))
+    #     UPLOAD_FOLDER2 = os.path.join(base_path ,UPLOAD_FOLDER)
+    #     img.save(navn, 'png')
+    #     img.save(UPLOAD_FOLDER2, navn)
+        
+        
+    return ""
 
 @app.route('/filter', methods=['POST'])
 def filter():
@@ -211,9 +243,8 @@ def filter():
     filterlist.append(filter.split(','))
     if filter[0][0] == ",":
         del filterlist[0][0]
-    print(filterlist)
     productfilter = filter_product(conn, filterlist)
-    if len(productfilter) <= 1:
+    if len(productfilter) <= 1 and type(productfilter) == str:
         return jsonify("No product fits the filter options choosen")
     else:
         return jsonify(productfilter)
