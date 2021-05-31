@@ -23,6 +23,9 @@ def create_connection(db_file):
 
 
 ###Base setup with the tables##########
+#username: A username for the user to uniquely identify them
+#The users password to enable login
+#An email for each user, for a real site this would be used for verification
 sql_create_user1_table = """CREATE TABLE IF NOT EXISTS users1 (
                                 username TEXT PRIMARY KEY,
                                 password TEXT,
@@ -30,6 +33,19 @@ sql_create_user1_table = """CREATE TABLE IF NOT EXISTS users1 (
                                 products ID PRIMARYKEY
                             );"""
 
+#Creates a product table
+#Id, uniqeuly id's every product, and increments on each product added to the database
+#Name, a name for each product, not unique due to products names might be similar
+#img blob -----BURDE BLI FJERNA
+#description, a description for the product
+#tickets, how many tickets the different users have spent on the specific product
+#mincost, minimum cost that allowes a product to be sold
+#owner, which user owns the product
+#spenders: A text with every user that has spent tickets on the specific product, inserted x amount of times as the tickets they have bought
+#filters which makes it possible to sort products based on genre
+#date, which date the product will be sold on
+#status: Tells if the product is done(date is reahed) or not done yet(date not reached)
+#Winner: If a winner is choosen, the winner will be added to the database to make sure no more than one winner is selected
 sql_create_products7_table = """CREATE TABLE IF NOT EXISTS products7 (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 name TEXT NOT NULL,
@@ -45,6 +61,8 @@ sql_create_products7_table = """CREATE TABLE IF NOT EXISTS products7 (
                                 winner text
                             );"""
 
+#username: username which owns the tickets
+#Tickets: how many tickets the user has
 sql_create_usertickets_table = """CREATE TABLE IF NOT EXISTS usertickets (
                                 username text,
                                 tickets integer

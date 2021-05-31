@@ -11,9 +11,7 @@ import PIL.Image as Image
 from array import array
 from subprocess import Popen, PIPE
 
-base_path = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER2 = 'static/images/'
-UPLOAD_FOLDER = os.path.join(base_path ,UPLOAD_FOLDER2)
+UPLOAD_FOLDER = '/static/images/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'ext', 'txt'}
 
 app = Flask(__name__)
@@ -283,9 +281,8 @@ def delete():
     prodid = handle_one_element(prodid)
     answer = delete_prod(conn, currentuserdata[0], prodid)
     tickets = get_user_tickets(conn, currentuserdata[0])
-    currentuserdata[1] = tickets[0]
+    currentuserdata[1] = tickets[0]   #updates the users tickets incase they spent tickets on their own product
     if answer == "Right":
-        #Dont need to update tickets due to this being the users own product
         return jsonify("Product is deleted")
     elif answer == "Wrong":
         return jsonify("Product cant be deleted by someone who doesnt own the product")

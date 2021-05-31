@@ -1,6 +1,7 @@
 
 
-//Spørr hva som er galt med skjemaet.
+//Main routing device
+//Each route is set up as a case where the hash decides what will be shown in the html, and which functions will be run
 async function onRouteChanged() {
     //Konstanter som henter deler av html siden hvor data skal settes inn for bruk.
     const hash = window.location.hash;
@@ -33,7 +34,9 @@ async function onRouteChanged() {
             +'<br>'
             +'<a href="#register" id="refern">Register user</a>'
             +'</form>';
+
             /////////////FUNCTIONS///////////
+
             //Sender data til backend for login
             $(document).ready(function() {
                 $('form').on('submit', function(event) {
@@ -127,10 +130,6 @@ async function onRouteChanged() {
                 +'<li><a href="#products"><i class="fa fa-shopping-cart"></i></a></li>'
             +'</ul>'
             +'</nav>';
-
-            app.innerHTML = "";
-
-            productcreation.innerHTML = "";
             
             //Fyller inn siden med filtrering og produkter
             main.innerHTML = '<section id="filter">'
@@ -175,6 +174,11 @@ async function onRouteChanged() {
                     +'<li><h3 id=currentusertickets>Tickets: </h3></li>'
                 +'</ul>'
             +'</div>';
+
+            /////////Empties other html divs which are not used on routechange on the new page//////////
+            app.innerHTML = "";
+
+            productcreation.innerHTML = "";
 
             ///////////////////EVENT LISTENERS/////////////////
             // Add eventlisteners to run functions properly
@@ -259,7 +263,7 @@ async function onRouteChanged() {
                     +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
                     +`</div>`
                     +`<br><br>`
-                    if (i+2 == data[1].length){
+                    if (i+1 == data[1].length){
                         console.log('Inni bilde henting')
                         products.innerHTML += `<div id="${data[1][i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
                         +`<section id="sideomside">`
@@ -298,8 +302,6 @@ async function onRouteChanged() {
                 +'<li><a href="#products"><i class="fa fa-shopping-cart"></i></a></li>'
             +'</ul>'
             +'</nav>';
-
-            app.innerHTML = "";
 
             main.innerHTML = '<div id="userinfo" style="display: none;">'
                 +'<ul>'
@@ -346,6 +348,11 @@ async function onRouteChanged() {
               +'<br>'
               +'<br>'
               +'<input type="button" value="Submit" id="createprod">';
+
+
+
+            /////////Empties other html divs which are not used on routechange on the new page//////////
+            app.innerHTML = "";
 
             ///////////////EVENT LISTENERS//////////////////
             //Adds eventlisteners
@@ -424,7 +431,7 @@ async function onRouteChanged() {
             break;
 
         }
-
+        //Default case, if the route the user tries to access isnt defined, the user will get an error message//
         default:
             productcreation.innerHTML = ""
 
@@ -456,7 +463,7 @@ function logoutconfirmation(){
     }
 }
 
-
+//Sends the image to the backend for processing
 async function sendimg(){
     img = document.getElementById('file').files[0]
     let response = await fetch('/imageprocessing', {
@@ -471,25 +478,10 @@ async function sendimg(){
 }
 }
 
-//Logs the user out and returns them to the login page
-async function logout(){
-    let confirmation = confirm("Are you sure you want to log out?")
-    if (confirmation) {
-    let response = await fetch('/logout', {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: "Logout"
-    });
-    if (response.status == 200) {
-        let result = await response.text()
-        window.location.hash = '#'
-        window.location.reload()
-}
-}
-}
 
+
+
+//////////////////////Filtration and sorting functions///////////////////////
 //Initiates the countdown for filtered products
 function startcountdownfilter(listelement) {
     var countdown = new Date(listelement).getTime()
@@ -517,7 +509,7 @@ function startcountdownfilter(listelement) {
 async function filter(written, house, vehicle, travel, furniture, other,Alphabetically,ticketvalue){
     filter = []
     //Filter part
-    //Makes sorting possible several times, due to issues with the innerhtml scripts
+    //Makes sorting possible several times, due to issues with the innerhtml scripts when filtering more than once
     if (house == null){
         written = 'searchbar'
         house = '#house:checked'
@@ -571,11 +563,13 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
         if (document.querySelector(`${ticketvalue}`) !== null){
             sort.push("ticket")
         }
+        //Checks if the user has tried to sort both alphabetically and by ticketcount
         if (result[0].length >= 1){
             if (sort.length > 1){
                 alert("You can only sort by one metric")
                 window.location.reload()
             }
+        //Checks if the user has choosen a sorting metric, if they have to list will be sorted, and afterwards put into the script
         if (sort.length == 1) {
             let result2 = sorted(result,sort[0])
             for (i=0; i<=result2.length-1;i++){
@@ -593,6 +587,7 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
                 +`</div><br><br>`;
             }
         }
+        //If no sorting metric has been choosen, the products will be shown in the order that they were created
         else {
         for (i=0; i<=result.length-1;i++){
             countdown = startcountdownfilter(result[i][6])
@@ -615,11 +610,10 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
 
 }
 
-
 function sorted(list, value){
     console.log(value)
     if (value == "Alpha"){
-        //Sorter alfabetisk.      [i][1] == navn
+        //Sorts alphabetically.      [i][1] == product name
         list.sort(function(a,b){
             if (a[1] < b[1]) {
                 return -1;
@@ -630,7 +624,7 @@ function sorted(list, value){
         });
     }
     if (value == "ticket") {
-        //Sorter etter ticketcount.  [i][4] == ticketcount
+        // Sorts based on highest to lowest ticketcount.  [i][4] == ticketcount
         list.sort(function(a,b){
             return (a[4]===null)-(b[4]===null) || +(a[4]<b[4])||-(a[4]>b[4]);
         });
@@ -640,6 +634,7 @@ function sorted(list, value){
         }
 
 
+/////////////////Main functionality functions//////////////////
 //Takes in the amount the user paid for which product and sends it to backend for checks and commits.
 async function pay_for_prod(productid,sum){
     sum = document.getElementById(`${sum}`).value
@@ -682,8 +677,8 @@ async function delete_product(productid) {
     }
 };
 
-//When the timer for a product is done, this will send the id and current ticketcount + mincost, to see if a winner can be choosen, and which it will be.
-//Afterwards it writes the winner into the product, if no winner is chosen, it writes it in the product.
+//When the timer for a product is done, this will send the id,current ticketcount and mincost to the backend, to see if a winner can be choosen, and which it will be.
+//Afterwards it writes the winner into the product and updates its status, if no winner is chosen, it writes it in the product.
 async function choose_winner(id, currentticket, mincost){
     let response = await fetch("/choosewinner", {
         method: "POST",
@@ -702,4 +697,23 @@ async function choose_winner(id, currentticket, mincost){
         }
     }
                 
+}
+
+//Logs the user out and returns them to the login page
+async function logout(){
+    let confirmation = confirm("Are you sure you want to log out?")
+    if (confirmation) {
+    let response = await fetch('/logout', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: "Logout"
+    });
+    if (response.status == 200) {
+        let result = await response.text()
+        window.location.hash = '#'
+        window.location.reload()
+}
+}
 }
