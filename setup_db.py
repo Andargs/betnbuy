@@ -176,12 +176,10 @@ def spend_tickets(conn,user,prodid,tickets):
     try:
         sqlhenttickets = ''' SELECT tickets FROM products7 WHERE id = ? '''
         curhenttickets.execute(sqlhenttickets, (prodid,))
-        print(curhenttickets)
         currenttickets = []
         currenttickets1 = 0
         for elements in curhenttickets:
             currenttickets.append(elements)
-            print(elements)
         if currenttickets[0][0] == None or currenttickets[0][0] == "null":
             currenttickets1 = 0
             currenttickets1 += int(tickets)
@@ -260,8 +258,6 @@ def delete_prod(conn, user, prodid):
     if int(status) == 1:
         return "Sold"
     try:
-        print(user)
-        print(prodid)
         sql = ''' SELECT owner FROM products7 WHERE id = ? ''' #Checks if the user who wants to delete a product is the owner of the product
         cur.execute(sql, (prodid, ))
         productowner = []
@@ -270,7 +266,7 @@ def delete_prod(conn, user, prodid):
     except Error as e:
         print(e)
     if f"{productowner[0][0]}" == f"{user}":       #If the owner is the one who deletes it, the product will be deleted
-        returntickets_ondelete(conn, user,prodid)
+        returntickets_ondelete(conn,prodid)
         cur1 = conn.cursor()
         try:
             sql1 = ''' DELETE FROM products7 WHERE id = ?'''
@@ -285,7 +281,7 @@ def delete_prod(conn, user, prodid):
 
 ##########RETURN TICKETS ON DELETE, OR IF PRODUCT DOESNT HAVE THE NECESSARY TICKETS TO PERFORM SALE##################
 
-def returntickets_ondelete(conn, user,prodid):
+def returntickets_ondelete(conn, prodid):
     cur = conn.cursor()
     try:
         sql = 'SELECT Spenders FROM products7 WHERE id = ?' #Retrieves the users who spent money on the product
@@ -324,7 +320,7 @@ def returntickets_ondelete(conn, user,prodid):
 
 #############PICK WINNER FOR PRODUCT#############
 
-def pick_winner(conn,id,tickets,mincost, user):
+def pick_winner(conn,id,tickets,mincost):
     status = confirmstatus(conn, id)
     if int(status) == 1:
         winner = get_winner(conn, id)
@@ -338,14 +334,14 @@ def pick_winner(conn,id,tickets,mincost, user):
         for element in cur:
             tickets1.append(element)
         if tickets == None or tickets == "null":  #Checks if the product has gotten buyers
-            returntickets_ondelete(conn,user,id)
+            returntickets_ondelete(conn,id)
             winner = "No winner choosen, tickets will be returned to spenders"
             update_winner(conn, id, winner)
             return "null"
         elif int(tickets) < int(mincost):        #Checks if the product has gotten enough tickets to be sold
             winner = "No winner choosen, tickets will be returned to spenders"
             update_winner(conn, id, winner)
-            returntickets_ondelete(conn,user,id)
+            returntickets_ondelete(conn,id)
             return "null"
         else:                   #If none of the if statements stops it, the product is approved for picking a winner
             cur2 = conn.cursor()

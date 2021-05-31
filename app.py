@@ -11,12 +11,14 @@ import PIL.Image as Image
 from array import array
 from subprocess import Popen, PIPE
 
-UPLOAD_FOLDER = 'static/images'
+base_path = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER2 = 'static/images/'
+UPLOAD_FOLDER = os.path.join(base_path ,UPLOAD_FOLDER2)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'ext', 'txt'}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config['./static/images/'] = UPLOAD_FOLDER
+app.config['/static/images/'] = UPLOAD_FOLDER
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
@@ -29,6 +31,7 @@ def valid_login(username, password):
     if username is not None:
         return check_password_hash(username,password)
     return False
+
 
 #Gets the database
 def get_db():
@@ -90,20 +93,12 @@ def handle_listdata(list):
         print(element)
     return list
 
-def handle_binary(binarystring):
-    binarystring = binarystring.split('&')
-    print(binarystring)
-
-def read_img(img):
-    #count = os.stat(img).st_size / 2
-    with open(img, "rb") as f:
-        return bytearray(f.read())
-
-
+#removes currentuserdata global value and removes the users ability to access sites without loging in again
 def removeuserinfo():
     global currentuserdata
     del currentuserdata
 
+#Removes the global image value and makes sure other images can be added
 def removeimg():
     global img
     del img
@@ -125,16 +120,19 @@ def home():
         data = handle_data(data)
     print(data)
     if data:
+        #Makes sure all values are filled in
         if len(data) ==2:
             try:
+                #escapes the data
                 username = escape(data[0])
                 password = escape(data[1])
                 if username is not None and password is not None:
                     try:
+                        #checks the password
                         useraccesed = passwordcheck(conn, username)
-                        print(useraccesed)
                         if len(useraccesed) <1:
                             return jsonify('No user by that name')
+                        #checks that the user and password are authorized
                         if username == useraccesed[0][0] and check_password_hash(useraccesed[0][1],password):
                             session['username'] = username
                             #Creates a global value with the current user, then extracts the username, their products and their tickets
@@ -170,8 +168,8 @@ def register():
             emailregister = escape(data[1])
             passwordregister = escape(data[2])
             passwordconf = escape(data[3])
-            print(str(usernameregister), str(emailregister), str(passwordregister), str(passwordconf))
             if request.method == "POST" and usernameregister is not None:
+                #makes sure the password is long enough and password and passwordregister is the same
                 if len(str(passwordregister)) >= 5 and passwordregister == passwordconf:
                     id = add_user(conn, usernameregister, generate_password_hash(passwordregister), emailregister)
                     if id != -1:
@@ -184,6 +182,7 @@ def register():
     
     return app.send_static_file("home.html")
 
+#Checks that the user is logged in, and gives the #home page the products which it will then show
 @app.route('/home', methods=['POST'])
 def user():
     conn = get_db()
@@ -206,34 +205,37 @@ def products():
     product = request.get_data()
     product = handle_data(product)
     add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
-    #removeimg()
+    removeimg()
     
     if product:
         return json.dumps('HERREKVELD')
 
     return app.send_static_file('home.html')
 
+#Processes the image and saves it with the correct id
 @app.route('/imageprocessing', methods=['POST'])
 def imageproc():
     conn = get_db()
-    # global img
-    # img = request.get_data()
-    # img = Image.open(io.BytesIO(img))
-    # id = get_id(conn)
-    # #Due to the product not being in the database yet, i have to get the id + 1
-    # id = int(id)+1
-    # if img:
-    #     id = str(id)
-    #     navn = f"{id}img"
-    #     filename = secure_filename('png')
-    #     base_path = os.path.abspath(os.path.dirname(__file__))
-    #     UPLOAD_FOLDER2 = os.path.join(base_path ,UPLOAD_FOLDER)
-    #     img.save(navn, 'png')
-    #     img.save(UPLOAD_FOLDER2, navn)
+    global img
+    img = request.get_data()
+    img = Image.open(io.BytesIO(img))
+    id = get_id(conn)
+    #Due to the product not being in the database yet, i have to get the id + 1
+    id = int(id)+1
+    if img:
+        id = str(id)
+        navn = f"{id}img"
+        filename = secure_filename('png')
+        #base_path = os.path.abspath(os.path.dirname(__file__))
+        #UPLOAD_FOLDER2 = os.path.join(base_path ,UPLOAD_FOLDER)
+        img.save(f'{navn}.png')
+        img.save(UPLOAD_FOLDER, filename)
         
         
     return ""
 
+
+#Takes the filter variables from js, sends it to retrieve the correct data from the database, and returns it
 @app.route('/filter', methods=['POST'])
 def filter():
     conn = get_db()
@@ -249,7 +251,7 @@ def filter():
     else:
         return jsonify(productfilter)
 
-
+#Retrieves how many tickets which user wants to use on which product, and sends it to the database for confirmation and updating
 @app.route('/payprod', methods=['POST'])
 def pay():
     conn = get_db()
@@ -271,6 +273,8 @@ def pay():
         print(tickets)
         return jsonify("Refresh")
 
+
+#Retrieves data from js with which product should be deleted, and checks if the user is allowed to delete the product selected
 @app.route('/deleteprod', methods=['POST'])
 def delete():
     
@@ -288,18 +292,21 @@ def delete():
     elif answer == "Sold":
         return jsonify("Cant delete a product thats already sold")
 
+#Retrieves which products time is up, sends the productid to the database to either pick winner and send tickets to the right user,
+#or find out that no winner should be selected, and send the tickets back to all users who spent tickets on it
 @app.route('/choosewinner', methods=['POST'])
 def choosewinner():
     conn = get_db()
     product = request.get_data()   #Retrieves data
     product = handle_data(product)  #Manages data
-    answer = pick_winner(conn,product[0],product[1],product[2], currentuserdata[0])  #Checks if the winner can be selected
+    answer = pick_winner(conn,product[0],product[1],product[2])  #Checks if the winner can be selected
     #if a winner can be selected, winner is returned, if not, it returns something that tells the js what to do
     tickets = get_user_tickets(conn, currentuserdata[0])
     currentuserdata[1] = tickets[0]
     if answer:
         return json.dumps(answer)
 
+#Logs the user out and redirects them to the login page
 @app.route('/logout', methods=['POST'])
 def logout():
     logout = request.get_data()
@@ -307,7 +314,7 @@ def logout():
     
     return "redirect"
 
-
+#Chooses a random port for the user to run the app on
 if __name__ == '__main__':
     port = 5000 + random.randint(0, 999)
     print(port)

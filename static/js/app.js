@@ -259,8 +259,27 @@ async function onRouteChanged() {
                     +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
                     +`</div>`
                     +`<br><br>`
-                    if (i+1 == data[1].length){
-                        console.log("legg til bilde")
+                    if (i+2 == data[1].length){
+                        console.log('Inni bilde henting')
+                        products.innerHTML += `<div id="${data[1][i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
+                        +`<section id="sideomside">`
+                        +`<h1 style="display:inline-block;" id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><button type="button" id="delete" onclick="delete_product(${data[1][i][0]})" style="display:inline-block;">DELETE</button>` 
+                        +`</section>`
+                        // var div = document.createElement('div')
+                        // var image = document.createElement('img')
+                        // image.setAttribute('src',`/${data[1][i][0].toString()}img.png`)
+                        // div.appendChild(image);
+                        // document.getElementById(`${data[1][i][0].toString()}img`).appendChild(div);
+                        //+`<div id="${data[1][i][0].toString()}img">`
+                        +`<img id="${data[1][i][0].toString()}img" src="/${data[1][i][0].toString()}img.png"/>`
+                        //+`</div>`
+                        +`<br>`
+                        +`<p>${data[1][i][3]}</p>`
+                        +`<h3 style="display:inline-block;">${data[1][i][4]}/${data[1][i][5]} tickets spent</h3>          <h3 style="display:inline-block; margin-left:25%" >Time left: ${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds</h3>`
+                        +`<br><br>`
+                        +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
+                        +`</div>`
+                        +`<br><br>`
                     }
                     
                 }
@@ -293,7 +312,7 @@ async function onRouteChanged() {
             // Setter opp skjema for å lage produkt
             productcreation.innerHTML = '<h1>Create Product</h1>'
             +'<form action="#products" method="POST"  name="prodcre" id="prodcre" enctype="multipart/form-data">'
-              +'<label for="file">Select product image (MUST BE JPG OR PNG!)</label>'
+              +'<label for="file">Select product image (MUST BE PNG!)</label>'
               +'<input type="file" id="file" accept="#products"  name="file">'
               +'<br>'
               +'<br>'
@@ -427,6 +446,8 @@ window.addEventListener('createprod', onclick);
 window.addEventListener('filterbutton', onclick)
 
 
+/////////////FUNCTIONS///////////////
+
 //Checks if the user meant to logout, if they wanted to, runs the actual logout function
 function logoutconfirmation(){
     let confirmation = confirm("Are you sure you wish to log out?")
@@ -496,6 +517,17 @@ function startcountdownfilter(listelement) {
 async function filter(written, house, vehicle, travel, furniture, other,Alphabetically,ticketvalue){
     filter = []
     //Filter part
+    //Makes sorting possible several times, due to issues with the innerhtml scripts
+    if (house == null){
+        written = 'searchbar'
+        house = '#house:checked'
+        vehicle = '#vehicle:checked'
+        travel = '#travel:checked'
+        furniture = '#furniture:checked'
+        other = '#other:checked'
+        Alphabetically = '#Alphabetically:checked'
+        ticketvalue = '#Ticket-Value:checked'
+    };
     writtenchange = document.getElementById(`${written}`).value
     filter.push(writtenchange)
     if (writtenchange == ""){
@@ -587,7 +619,6 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
 function sorted(list, value){
     console.log(value)
     if (value == "Alpha"){
-        console.log("Er i alpha")
         //Sorter alfabetisk.      [i][1] == navn
         list.sort(function(a,b){
             if (a[1] < b[1]) {
@@ -599,13 +630,11 @@ function sorted(list, value){
         });
     }
     if (value == "ticket") {
-        console.log("Er i ticket")
         //Sorter etter ticketcount.  [i][4] == ticketcount
         list.sort(function(a,b){
             return (a[4]===null)-(b[4]===null) || +(a[4]<b[4])||-(a[4]>b[4]);
         });
         }
-        console.log(list)
         return list
 
         }
