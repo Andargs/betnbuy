@@ -1,6 +1,5 @@
 import sqlite3
 from sqlite3 import Error
-from collections import Counter
 import random
 
 database = r"./database.db"
@@ -156,7 +155,6 @@ def get_all_products(conn):
         cur.execute(sql,)
         for product in cur:
             products.append(product)
-            print(product)
     return products
 
 #Add a product to the database
@@ -341,9 +339,12 @@ def returntickets_ondelete(conn, prodid):
 
 def pick_winner(conn,id,tickets,mincost):
     status = confirmstatus(conn, id)
-    if int(status) == 1:
-        winner = get_winner(conn, id)
-        return winner
+    try:
+        if int(status) == 1:
+            winner = get_winner(conn, id)
+            return winner
+    except TypeError as e:
+        print(e)
     cur = conn.cursor()
     try:
         updatestatus(conn,id)
@@ -406,11 +407,23 @@ def pick_winner_name(conn, id):
 
 
 ##############FILTER PRODUCTS################
-
+#Filter will always take one input, meaning that even though a user filters based on nothing, it will pass " " as the search value,
+#The function will therefore give out every product in the database.
+#If more filters are choosen, the database will insert x elements in the database to see what is choosen
 def filter_product(conn, list):
     length = len(list[0])
     productsfilter = []
-    if length == 1:       #If the length of input is one element
+    if length == 1 and list[0][0] == " ":
+        cur = conn.cursor()
+        try:
+            sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products7 WHERE id >= 0'
+            cur.execute(sql, )
+            for element in cur:
+                productsfilter.append(element)
+            return productsfilter
+        except Error as e:
+            print(e)
+    if length == 1:       #If the length of input is one element and the input is different than " "
         cur = conn.cursor()
         try:
             sql = 'SELECT id,name,img,description,tickets,mincost,date FROM products7 WHERE instr(name, ?)'
@@ -479,6 +492,7 @@ def confirmstatus(conn, id):
         sql = 'Select status FROM products7 WHERE id = ?'
         cur.execute(sql, (id, ))
         for element in cur:
+            print(element[0])
             return element[0]
     except Error as e:
         print(e)

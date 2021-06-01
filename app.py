@@ -96,10 +96,7 @@ def removeuserinfo():
     global currentuserdata
     del currentuserdata
 
-#Removes the global image value and makes sure other images can be added
-def removeimg():
-    global img
-    del img
+
 
 
 
@@ -203,7 +200,6 @@ def products():
     product = request.get_data()
     product = handle_data(product)
     add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
-    removeimg()
     
     if product:
         return json.dumps('HERREKVELD')
@@ -214,7 +210,6 @@ def products():
 @app.route('/imageprocessing', methods=['POST'])
 def imageproc():
     conn = get_db()
-    global img
     img = request.get_data()
     img = Image.open(io.BytesIO(img))
     id = get_id(conn)
@@ -223,10 +218,6 @@ def imageproc():
     if img:
         id = str(id)
         navn = f"{id}img"
-        filename = secure_filename('png')
-        #base_path = os.path.abspath(os.path.dirname(__file__))
-        #UPLOAD_FOLDER2 = os.path.join(base_path ,UPLOAD_FOLDER)
-        #img.save(f'{navn}.png')
         img.save('./static/images/'+f'{navn}.png', 'PNG')
         
         

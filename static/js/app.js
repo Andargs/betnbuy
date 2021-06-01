@@ -248,7 +248,6 @@ async function onRouteChanged() {
 
                     }
                     //////////////Adds products in the html
-                    image = localStorage.getItem("HER TRENGER JEG produktid")
                     countdown = startcountdown(data)
                     //Adds product in html
                     products.innerHTML += `<div id="${data[1][i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
@@ -310,7 +309,7 @@ async function onRouteChanged() {
               +'<label for="date">Choose a finishing date, format:Sep 3, 2021 12:00:00</label>'
               +'<input type="text" id="date" name="date">'
               +'<br>'
-              +'<br>'
+              +`<h4>Only one genre should be selected</h4>`
               +'<label for="House" class="checkboxes">Housing<input type="checkbox" id="house" name="check" value="house" class="checkboxes"/>'
               +'</label>'
               +'<label for="vehicle" class="checkboxes">Vehicle<input type="checkbox" id="vehicle" name="check" value="vehicle" class="checkboxes"/>'
@@ -431,33 +430,6 @@ window.addEventListener('filterbutton', onclick)
 
 
 /////////////FUNCTIONS///////////////
-
-//Checks if the user meant to logout, if they wanted to, runs the actual logout function
-function logoutconfirmation(){
-    let confirmation = confirm("Are you sure you wish to log out?")
-    if (confirmation){
-        logout()
-    }
-}
-
-//Sends the image to the backend for processing
-async function sendimg(){
-    img = document.getElementById('file').files[0]
-    let response = await fetch('/imageprocessing', {
-        method: "POST",
-        header:{
-            'content-type': 'image/png'
-        },
-        body: img
-    });
-    if (response.status == 200) {
-        let result = await response.text()
-}
-}
-
-
-
-
 //////////////////////Filtration and sorting functions///////////////////////
 //Initiates the countdown for filtered products
 function startcountdownfilter(listelement) {
@@ -483,6 +455,9 @@ function startcountdownfilter(listelement) {
 
 
 // Filters products based on the users input
+// If the user hasnt added a genre for their product, the product will not show up if they try to sort on the actual genre.
+// Example: User A creates a product listing with a bed, but doesnt add furniture as a genre.
+// User B wants to see beds, so he filters based on furniture, the bed listing user A made will not be shown.
 async function filter(written, house, vehicle, travel, furniture, other,Alphabetically,ticketvalue){
     filter = []
     //Filter part
@@ -506,10 +481,10 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
         filter.push("house")
     }
     if (document.querySelector(`${vehicle}`) !== null){
-        filter.push("travel")
+        filter.push("vehicle")
     }
     if (document.querySelector(`${travel}`) !== null){
-        filter.push("vehicle")
+        filter.push("travel")
     }
     if (document.querySelector(`${other}`) !== null){
         filter.push("other")
@@ -553,9 +528,9 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
                 countdown = startcountdownfilter(result2[i][6])
                 products.innerHTML += `<div id="${result2[i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
                 +`<section id="sideomside">`
-                +`<h1 id="${result[i][0].toString()}winner" style="display:inline-block;">${result2[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result2[i][0]})" style="display:inline-block; margin-bottom:2.5%;">DELETE</button>` 
+                +`<h1 id="${result2[i][0].toString()}winner" style="display:inline-block;">${result2[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result2[i][0]})" style="display:inline-block; margin-bottom:2.5%;">DELETE</button>` 
                 +`</section>`
-                +`<h2>${result2[i][2]}</h2>`
+                +`<img id="${result2[i][0].toString()}img" src="./static/images/${result2[i][0].toString()}img.png"/>`
                 +`<br>`
                 +`<p>${result2[i][3]}</p>`
                 +`<h3 style="display:inline-block;" >${result2[i][4]}/${result2[i][5]} tickets</h3>          <h3 style="display:inline-block; margin-left:25%" >${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
@@ -572,7 +547,7 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
             +`<section id="sideomside">`
             +`<h1 id="${result[i][0].toString()}winner" style="display:inline-block;">${result[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result[i][0]})" style="display:inline-block; margin-bottom:2.5%;">DELETE</button>` 
             +`</section>`
-            +`<h2>${result[i][2]}</h2>`
+            +`<img id="${result[i][0].toString()}img" src="./static/images/${result[i][0].toString()}img.png"/>`
             +`<br>`
             +`<p>${result[i][3]}</p>`
             +`<h3 style="display:inline-block;" >${result[i][4]}/${result[i][5]} tickets</h3>          <h3 style="display:inline-block; margin-left:25%" >${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds left</h3>`
@@ -692,5 +667,28 @@ async function logout(){
         window.location.hash = '#'
         window.location.reload()
 }
+}
+}
+
+//Checks if the user meant to logout, if they wanted to, runs the actual logout function
+function logoutconfirmation(){
+    let confirmation = confirm("Are you sure you wish to log out?")
+    if (confirmation){
+        logout()
+    }
+}
+
+//Sends the image to the backend for processing
+async function sendimg(){
+    img = document.getElementById('file').files[0]
+    let response = await fetch('/imageprocessing', {
+        method: "POST",
+        header:{
+            'content-type': 'image/png'
+        },
+        body: img
+    });
+    if (response.status == 200) {
+        let result = await response.text()
 }
 }
