@@ -108,7 +108,7 @@ def add_user(conn, username,password,email):
         print(e)
         return -1
 
-#Checks the password
+#Checks the password against the database
 def passwordcheck(conn, username):
     cur = conn.cursor()
     sql = ("SELECT username,password FROM users1 WHERE username = ?") 
@@ -378,7 +378,7 @@ def pick_winner(conn,id,tickets,mincost):
                 sql3 = 'UPDATE usertickets SET tickets = ? WHERE username = ? LIMIT 1'        #adds the tickets spent on their product
                 cur3.execute(sql3, (newticketcount,tickets1[0][0],))
                 conn.commit()
-                answer = pick_winner_name(conn, id)
+                answer = pick_winner_name(conn, id)         #Picks a winner by getting a name out of the specified products spenders attribute
                 return answer
             except Error as e:
                 print(e)
@@ -492,7 +492,6 @@ def confirmstatus(conn, id):
         sql = 'Select status FROM products7 WHERE id = ?'
         cur.execute(sql, (id, ))
         for element in cur:
-            print(element[0])
             return element[0]
     except Error as e:
         print(e)
@@ -549,13 +548,6 @@ def setup():
         create_table(conn, sql_create_user1_table)
         create_table(conn, sql_create_usertickets_table)
         conn.close()
-    # cur = conn.cursor()
-    # try:
-    #     sql = 'DELETE FROM products7 WHERE id <= 52'
-    #     cur.execute(sql,)
-    #     conn.commit()
-    # except Error as e:
-    #     print(e)
 
 
 if __name__ == '__main__':

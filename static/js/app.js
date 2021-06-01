@@ -322,7 +322,6 @@ async function onRouteChanged() {
               +'</label>'
               +'<br>'
               +'<br>'
-              +'<br>'
               +'<input type="button" value="Submit" id="createprod">';
 
 
@@ -377,7 +376,6 @@ async function onRouteChanged() {
                 if (document.querySelector('#furniture:checked') !== null){
                     filter.push("furniture")
                 }
-                //storeimg(img)
 
                 let response = await fetch("/products",{
                     method: "POST",
@@ -389,12 +387,18 @@ async function onRouteChanged() {
                 });
                 if (response.status == 200){
                     let result = await response.text()
-                    return window.location.hash = '#home'
+                    if (result == "An error occured, try again"){
+                        alert(result)
+                        window.location.reload()
+                    }
+                    window.location.hash = '#home'
+                    window.location.reload()
+
                 }
             }
 
             
-
+            //Lets the user see their tickets and username by clicking the user logo
             function showuser() {
                 var user = document.getElementById('userinfo');
                 if (user.style.display === "none") {
@@ -526,6 +530,9 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
             let result2 = sorted(result,sort[0])
             for (i=0; i<=result2.length-1;i++){
                 countdown = startcountdownfilter(result2[i][6])
+                if (countdown[0] == 0 && countdown[1] == 0 && countdown[2] == 0 && countdown[3] == 0){
+                    choose_winner(result2[i][0],result2[i][4],result2[i][5])
+                }
                 products.innerHTML += `<div id="${result2[i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
                 +`<section id="sideomside">`
                 +`<h1 id="${result2[i][0].toString()}winner" style="display:inline-block;">${result2[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result2[i][0]})" style="display:inline-block; margin-bottom:2.5%;">DELETE</button>` 
@@ -540,9 +547,12 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
             }
         }
         //If no sorting metric has been choosen, the products will be shown in the order that they were created
-        else {
+        if (sort.length == 0) {
         for (i=0; i<=result.length-1;i++){
             countdown = startcountdownfilter(result[i][6])
+            if (countdown[0] == 0 && countdown[1] == 0 && countdown[2] == 0 && countdown[3] == 0){
+                choose_winner(result[i][0],result[i][4],result[i][5])
+            }
             products.innerHTML += `<div id="${result[i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
             +`<section id="sideomside">`
             +`<h1 id="${result[i][0].toString()}winner" style="display:inline-block;">${result[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result[i][0]})" style="display:inline-block; margin-bottom:2.5%;">DELETE</button>` 
@@ -562,8 +572,8 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
 
 }
 
+//Sorts the list, based on a given string value, either "Alpha" for alfabetically, or ticket for sorting by ticketcount
 function sorted(list, value){
-    console.log(value)
     if (value == "Alpha"){
         //Sorts alphabetically.      [i][1] == product name
         list.sort(function(a,b){

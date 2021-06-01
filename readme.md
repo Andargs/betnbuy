@@ -1,4 +1,5 @@
 Site uses jquery and ajax, but jquery is only used 4 times and isnt very complicated.
+Site also uses flask add ons: PIL and IObytes
 
 -Main functionality of page
     -The page functions mainly like a auctioning site, except in this case, the winner is selected randomly among the people who spent a ticket on the product. If the product doesnt reach the minimum cost selected by the creator of the product, the product will not be sold, and all tickets will be returned to the users who spent money on tickets for the product.

@@ -77,24 +77,12 @@ def handle_one_element(string):
     string = string.replace('\'','')
     return string
 
-#handle user input with commas and colons and converts it to actually readable formats
-def handle_listdata(list):
-    list = str(list)
-    list=list.split("&")
-    list[0]=list[0].replace('b\'','')
-    list[-1]=list[-1].replace('\'','')
-    for element in list:
-        element = element.split('=')[1]
-        element = element.replace('+',' ')
-        element = element.replace('%2C', ',')
-        element = element.replace('%3A', ':')
-        print(element)
-    return list
-
 #removes currentuserdata global value and removes the users ability to access sites without loging in again
 def removeuserinfo():
     global currentuserdata
     del currentuserdata
+
+
 
 
 
@@ -138,7 +126,6 @@ def home():
                             currentuser = {
                                 "username": useraccesed[0][0],
                             }
-                            #print(json.dumps(useraccesed[0][0]))
                             return jsonify(currentuser)
                         else:
                             return jsonify('Wrong password')
@@ -159,8 +146,8 @@ def register():
         data = handle_data(data)
     if data:
         if len(data) > 2:
-            usernameregister = escape(data[0])
-            emailregister = escape(data[1])
+            usernameregister = escape(data[0])    #escapes data, not really necessary for a test run, but would be in a real environment
+            emailregister = escape(data[1])     #therefore only done here
             passwordregister = escape(data[2])
             passwordconf = escape(data[3])
             if request.method == "POST" and usernameregister is not None:
@@ -202,9 +189,9 @@ def products():
     add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
     
     if product:
-        return json.dumps('HERREKVELD')
-
-    return app.send_static_file('home.html')
+        return json.dumps('Product created')
+    else:
+        return json.dumps("An error occured, try again")
 
 #Processes the image and saves it with the correct id
 @app.route('/imageprocessing', methods=['POST'])
@@ -259,7 +246,6 @@ def pay():
         #Updates the users info about itself
         tickets = get_user_tickets(conn, currentuserdata[0])
         currentuserdata[1] = tickets[0]
-        print(tickets)
         return jsonify("Refresh")
 
 
@@ -305,8 +291,6 @@ def logout():
 #Chooses a random port for the user to run the app on
 if __name__ == '__main__':
     port = 5000 + random.randint(0, 999)
-    print(port)
     url = "http://127.0.0.1:{0}".format(port)
-    print(url)
     app.run(use_reloader=False, debug=True, port=port)
     #app.run(debug=True)
