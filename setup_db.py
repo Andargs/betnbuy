@@ -156,6 +156,7 @@ def get_all_products(conn):
         cur.execute(sql,)
         for product in cur:
             products.append(product)
+            print(product)
     return products
 
 #Add a product to the database
@@ -533,14 +534,14 @@ def setup():
         create_table(conn, sql_create_products7_table)
         create_table(conn, sql_create_user1_table)
         create_table(conn, sql_create_usertickets_table)
-        #conn.close()
-    cur = conn.cursor()
-    try:
-        sql = 'DELETE FROM products7 WHERE id > 23'
-        cur.execute(sql,)
-        conn.commit()
-    except Error as e:
-        print(e)
+        conn.close()
+    # cur = conn.cursor()
+    # try:
+    #     sql = 'DELETE FROM products7 WHERE id <= 52'
+    #     cur.execute(sql,)
+    #     conn.commit()
+    # except Error as e:
+    #     print(e)
 
 
 if __name__ == '__main__':

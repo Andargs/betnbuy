@@ -11,12 +11,12 @@ import PIL.Image as Image
 from array import array
 from subprocess import Popen, PIPE
 
-UPLOAD_FOLDER = '/static/images/'
+UPLOAD_FOLDER = './static/images/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'ext', 'txt'}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config['/static/images/'] = UPLOAD_FOLDER
+app.config['./static/images/'] = UPLOAD_FOLDER
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
@@ -226,8 +226,8 @@ def imageproc():
         filename = secure_filename('png')
         #base_path = os.path.abspath(os.path.dirname(__file__))
         #UPLOAD_FOLDER2 = os.path.join(base_path ,UPLOAD_FOLDER)
-        img.save(f'{navn}.png')
-        img.save(UPLOAD_FOLDER, filename)
+        #img.save(f'{navn}.png')
+        img.save('./static/images/'+f'{navn}.png', 'PNG')
         
         
     return ""

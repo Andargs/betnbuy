@@ -255,7 +255,7 @@ async function onRouteChanged() {
                     +`<section id="sideomside">`
                     +`<h1 style="display:inline-block;" id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><button type="button" id="delete" onclick="delete_product(${data[1][i][0]})" style="display:inline-block;">DELETE</button>` 
                     +`</section>`
-                    +`<h2 id="${data[1][i][0].toString()}img">${data[1][i][2]}</h2>`
+                    +`<img id="${data[1][i][0].toString()}img" src="./static/images/${data[1][i][0].toString()}img.png"/>`
                     +`<br>`
                     +`<p>${data[1][i][3]}</p>`
                     +`<h3 style="display:inline-block;">${data[1][i][4]}/${data[1][i][5]} tickets spent</h3>          <h3 style="display:inline-block; margin-left:25%" >Time left: ${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds</h3>`
@@ -263,29 +263,6 @@ async function onRouteChanged() {
                     +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
                     +`</div>`
                     +`<br><br>`
-                    if (i+1 == data[1].length){
-                        console.log('Inni bilde henting')
-                        products.innerHTML += `<div id="${data[1][i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
-                        +`<section id="sideomside">`
-                        +`<h1 style="display:inline-block;" id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><button type="button" id="delete" onclick="delete_product(${data[1][i][0]})" style="display:inline-block;">DELETE</button>` 
-                        +`</section>`
-                        // var div = document.createElement('div')
-                        // var image = document.createElement('img')
-                        // image.setAttribute('src',`/${data[1][i][0].toString()}img.png`)
-                        // div.appendChild(image);
-                        // document.getElementById(`${data[1][i][0].toString()}img`).appendChild(div);
-                        //+`<div id="${data[1][i][0].toString()}img">`
-                        +`<img id="${data[1][i][0].toString()}img" src="/${data[1][i][0].toString()}img.png"/>`
-                        //+`</div>`
-                        +`<br>`
-                        +`<p>${data[1][i][3]}</p>`
-                        +`<h3 style="display:inline-block;">${data[1][i][4]}/${data[1][i][5]} tickets spent</h3>          <h3 style="display:inline-block; margin-left:25%" >Time left: ${countdown[0]} days:${countdown[1]} hours:${countdown[2]} minutes:${countdown[3]} seconds</h3>`
-                        +`<br><br>`
-                        +`<input type="number" placeholder="How many tickets to use" id="${data[1][i][0].toString()}sum"><button type="button" id="submittickets" onclick="pay_for_prod(${data[1][i][0]},'${data[1][i][0].toString()}sum')">Submit</button> <br><br>`
-                        +`</div>`
-                        +`<br><br>`
-                    }
-                    
                 }
             }; 
             break;
