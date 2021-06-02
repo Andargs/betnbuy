@@ -95,7 +95,7 @@ def remove_filter():
 
 
 
-
+####################LOGIN PAGE#############################
 #Handles login
 @app.route("/", methods=['POST', 'GET'])
 def home():
@@ -139,7 +139,7 @@ def home():
     
     return app.send_static_file("home.html")
 
-
+######################REGISTER PAGE##########################
 #Registers users
 @app.route('/register', methods=['POST'])
 def register():
@@ -167,6 +167,7 @@ def register():
     
     return app.send_static_file("home.html")
 
+####################HOME PAGE################################
 #Checks that the user is logged in, and gives the #home page the products which it will then show
 @app.route('/home', methods=['POST'])
 def user():
@@ -190,36 +191,6 @@ def user():
     
     return app.send_static_file('home.html')
 
-#Adds the product the user created to the main page
-@app.route('/products', methods=['POST'])
-def products():
-    conn = get_db()
-    product = request.get_data()
-    product = handle_data(product)
-    add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])
-    
-    if product:
-        return json.dumps('Product created')
-    else:
-        return json.dumps("An error occured, try again")
-
-#Processes the image and saves it with the correct id
-@app.route('/imageprocessing', methods=['POST'])
-def imageproc():
-    conn = get_db()
-    img = request.get_data()
-    img = Image.open(io.BytesIO(img))
-    id = get_id(conn)
-    #Due to the product not being in the database yet, i have to get the id + 1
-    id = int(id)+1
-    if img:
-        id = str(id)
-        navn = f"{id}img"
-        img.save('./static/images/'+f'{navn}.png', 'PNG')
-        
-        
-    return ""
-
 
 #Takes the filter variables from js, sends it to retrieve the correct data from the database, and returns it
 @app.route('/filter', methods=['POST'])
@@ -230,12 +201,13 @@ def filter():
     filterlist = []
     filterlist.append(filter.split(','))
     if filter[0][0] == ",":
-        del filterlist[0][0]
+        del filterlist[0][0]    #Removes redundant elements from the filter value given and cleans it up before accessing the database
     global current_filter
-    current_filter = filterlist       #Sets the filterdata as a global value, so it can be used when the user opens home again
+    current_filter = filterlist       #Sets the filterdata as a global value, so it can be used when the user opens #home again
     productfilter = filter_product(conn, filterlist)
     if len(productfilter) <= 1 and type(productfilter) == str:
-        return jsonify("No product fits the filter options choosen")
+        del current_filter
+        return json.dumps("No product fits the filter options choosen")
     else:
         return jsonify(productfilter)
 
@@ -272,11 +244,11 @@ def delete():
     tickets = get_user_tickets(conn, currentuserdata[0])
     currentuserdata[1] = tickets[0]   #updates the users tickets incase they spent tickets on their own product
     if answer == "Right":
-        return jsonify("Product is deleted")
+        return jsonify("Product is deleted")        #All checks worked and the product is deleted.
     elif answer == "Wrong":
-        return jsonify("Product cant be deleted by someone who doesnt own the product")
+        return jsonify("Product cant be deleted by someone who doesnt own the product") #The user doesnt own the product and cant delete it
     elif answer == "Sold":
-        return jsonify("Cant delete a product thats already sold")
+        return jsonify("Cant delete a product thats already sold")  #The products status is 1, ergo the product is sold, and therefore cant be deleted
 
 #Retrieves which products time is up, sends the productid to the database to either pick winner and send tickets to the right user,
 #or find out that no winner should be selected, and send the tickets back to all users who spent tickets on it
@@ -292,6 +264,40 @@ def choosewinner():
     if answer:
         return json.dumps(answer)
 
+#################################REGISTER PRODUCTS PAGE######################################
+#Adds the product the user created to the main page
+@app.route('/products', methods=['POST'])
+def products():
+    conn = get_db()
+    product = request.get_data()
+    product = handle_data(product)
+    add_product(conn,product[1],product[0],product[2],int(product[3]),currentuserdata[0],product[4],product[5])  #Sends the product data to the backend for
+    #adding to the database
+    
+    if product:
+        return json.dumps('Product created')    #Product is created, this message will reroute the user to #home
+    else:
+        return json.dumps("An error occured, try again") #An error occured.
+
+#Processes the image and saves it with the correct id
+@app.route('/imageprocessing', methods=['POST'])
+def imageproc():
+    conn = get_db()
+    img = request.get_data()
+    img = Image.open(io.BytesIO(img))
+    id = get_id(conn)
+    #Due to the product not being in the database yet, i have to get the id + 1
+    id = int(id)+1
+    if img:
+        id = str(id)
+        navn = f"{id}img"
+        img.save('./static/images/'+f'{navn}.png', 'PNG')
+        
+        
+    return ""
+
+
+#############################LOGOUT FUNCTION###################################
 #Logs the user out and redirects them to the login page
 @app.route('/logout', methods=['POST'])
 def logout():

@@ -1,9 +1,15 @@
 Site uses jquery and ajax, but jquery is only used 4 times and isnt very complicated.
-Site also uses flask add ons: PIL and IObytes
+Site also uses flask add ons: PIL and IObytes to handle images
 
 
-To run the app: python3 app.py
+To run the app be in the root of eksamen3 folder, and run: python3 app.py
 The database should already be created with some base products
+
+
+All functionality is based on input in js, the input is retrieved by the backend app.py which processes the data, if needed, the app.py script will call upon functions from setup_db.py, which communicates with the database
+
+
+-images uploaded by user: Due to the images having to be sent alone on fetch to contain its original format, the id has to be added without communicating with the product the image is a part of. Therefore if the very last product is deleted, and another product is created, the very last product might not find its product image. If this happens, create the same product again, and then delete the product where the image is not found.  
 
 -Main functionality of page
     -The page functions mainly like a auctioning site, except in this case, the winner is selected randomly among the people who spent a ticket on the product. Even though a user pays the full minimum cost, they are not sure they will win the product. If the product doesnt reach the minimum cost selected by the creator of the product, the product will not be sold, and all tickets will be returned to the users who spent money on tickets for the product.
@@ -28,6 +34,7 @@ The database should already be created with some base products
         -Both filter and sort are enabled by pressing the filter button
         -Some products will be added either without a filter, just to show that a product doesnt automatically get a genre.
         -Due to the way a plain js router is set up and how it communicates with the backend, the simplest way to store the users filter preferences seemed to be a global value.
+        -If no product fits the description, the page will be blank. To get products back, filter by another metric
     -products
         -Every product has its own delete button which will delete the product
             -On delete all the tickets spent on the product will be returned to the users who spent money on it

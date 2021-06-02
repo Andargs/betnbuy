@@ -295,19 +295,19 @@ async function onRouteChanged() {
               +'<br>'
               +'<br>'
               +'<label for="Pname">Choose a product name</label>'
-              +'<input type="text" id="pname" name="pname">'
+              +'<input type="text" id="pname" name="pname" required>'
               +'<br>'
               +'<br>'
               +'<label for="description">Write a fitting description</label>'
-              +'<input type="text" id="description" name="description">'
+              +'<input type="text" id="description" name="description" required>'
               +'<br>'
               +'<br>'
               +'<label for="mincost">Choose a minimum cost</label>'
-              +'<input type="number" id="mincost" name="mincost">'
+              +'<input type="number" id="mincost" name="mincost" required>'
               +'<br>' 
               +'<br>'
               +'<label for="date">Choose a finishing date, format:Sep 3, 2021 12:00:00</label>'
-              +'<input type="text" id="date" name="date">'
+              +'<input type="text" id="date" name="date" required>'
               +'<br>'
               +`<h4>Only one genre should be selected</h4>`
               +'<label for="House" class="checkboxes">Housing<input type="checkbox" id="house" name="check" value="house" class="checkboxes"/>'
@@ -507,9 +507,9 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
         let result = await response.json()
         products = document.getElementById('products')
         products.innerHTML = ``
-        if (result == `No product fits the filter options choosen`){
-            alert(result)
-            return window.location.reload()
+        console.log("Dette er string")
+        if (result[0] == null){
+            alert("No products fits the description given")
         }
         //Sort part
         sort = []
@@ -535,7 +535,7 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
                 }
                 products.innerHTML += `<div id="${result2[i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
                 +`<section id="sideomside">`
-                +`<h1 id="${result2[i][0].toString()}winner" style="display:inline-block;">${result2[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result2[i][0]})" style="display:inline-block; margin-bottom:2.5%;">DELETE</button>` 
+                +`<h1 style="display:inline-block;" id="${result2[i][0].toString()}winner">${result2[i][1]}</h1><br> <button type="button" id="delete" onclick="delete_product(${result2[i][0]})" style="display:inline-block;">DELETE</button>` 
                 +`</section>`
                 +`<img id="${result2[i][0].toString()}img" src="./static/images/${result2[i][0].toString()}img.png"/>`
                 +`<br>`
