@@ -34,7 +34,7 @@ All functionality is based on input in js, the input is retrieved by the backend
         -Filtering allowes the user to filter based upon the name of the product, and what genre they fit in
         -Beneath the filter options, there are 2 options for sorting, there the user can either sort the products by highest ticketcount spent, or alphabetically, not both at the same time
         -Both filter and sort are enabled by pressing the filter button
-        -Some products will be added either without a filter, just to show that a product doesnt automatically get a genre.
+        -Some products i added were added without a filter, just to show that a product doesnt automatically get a genre.
         -Due to the way a plain js router is set up and how it communicates with the backend, the simplest way to store the users filter preferences seemed to be a global value. Filter values will be stored, sorting values will not
         -If no product fits the description, the page will be blank. To get products back, filter by another metric
     -products

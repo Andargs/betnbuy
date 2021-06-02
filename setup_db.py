@@ -385,7 +385,7 @@ def pick_winner(conn,id,tickets,mincost):
             newticketcount += int(tickets)
             try:
                 cur3 = conn.cursor()
-                sql3 = 'UPDATE usertickets SET tickets = ? WHERE username = ? LIMIT 1'        #adds the tickets spent on their product
+                sql3 = 'UPDATE usertickets SET tickets = ? WHERE username = ? LIMIT 1'        #adds the tickets spent on their product to their balance
                 cur3.execute(sql3, (newticketcount,tickets1[0][0],))
                 conn.commit()
                 answer = pick_winner_name(conn, id)         #Picks a winner by getting a name out of the specified products spenders attribute
