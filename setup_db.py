@@ -182,6 +182,17 @@ def add_product(conn, name, img,description, mincost, owner,date, filters):
         print(e)
 
 
+#Gets the new soon to be product id, and retrieves it for processing to make sure each product gets their respective image
+def get_id(conn):
+    cur = conn.cursor()
+    try:
+        sql = 'SELECT MAX(id) FROM products7'
+        cur.execute(sql,)
+        for element in cur:
+            return element[0]
+    except Error as e:
+        print(e)
+
 ##################SPEND TICKETS ON PRODUCTS####################
 
 def spend_tickets(conn,user,prodid,tickets):
@@ -522,17 +533,6 @@ def get_winner(conn, id):
     try:
         sql = 'Select winner FROM products7 WHERE id = ?'
         cur.execute(sql, (id,))
-        for element in cur:
-            return element[0]
-    except Error as e:
-        print(e)
-
-#Gets the new soon to be product id, and adds it to image to make sure each product gets their respective image
-def get_id(conn):
-    cur = conn.cursor()
-    try:
-        sql = 'SELECT MAX(id) FROM products7'
-        cur.execute(sql,)
         for element in cur:
             return element[0]
     except Error as e:

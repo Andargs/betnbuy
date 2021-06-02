@@ -249,7 +249,7 @@ async function onRouteChanged() {
                     }
                     //////////////Adds products in the html
                     countdown = startcountdown(data)
-                    //Adds product in html
+                    //Adds products in html
                     products.innerHTML += `<div id="${data[1][i][0].toString()}" style=" border:solid; border-width:2px; border-color:#9932cc;">`
                     +`<section id="sideomside">`
                     +`<h1 style="display:inline-block;" id="${data[1][i][0].toString()}winner">${data[1][i][1]}</h1><button type="button" id="delete" onclick="delete_product(${data[1][i][0]})" style="display:inline-block;">DELETE</button>` 

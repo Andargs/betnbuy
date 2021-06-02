@@ -82,7 +82,10 @@ def removeuserinfo():
     global currentuserdata
     del currentuserdata
 
-
+def remove_filter():
+    global current_filter
+    current_filter = []
+    del current_filter
 
 
 
@@ -171,6 +174,13 @@ def user():
     #If the user is logged in, this will return the users data to the mainpage along with the products
     #If the user is not logged in, the page will redirect the user back to the login site.
     try:
+        if current_filter is not None:  #Checks if the user has already filtered products
+            product = filter_product(conn, current_filter)  #if the user has filtered before, the filter will be applied and only
+            #filtered products will be shown
+            return jsonify(currentuserdata, product)
+    except NameError as e:
+        print(e)
+    try:
         if currentuserdata:
             if currentuserdata != None:
                 product = get_all_products(conn)
@@ -221,6 +231,8 @@ def filter():
     filterlist.append(filter.split(','))
     if filter[0][0] == ",":
         del filterlist[0][0]
+    global current_filter
+    current_filter = filterlist       #Sets the filterdata as a global value, so it can be used when the user opens home again
     productfilter = filter_product(conn, filterlist)
     if len(productfilter) <= 1 and type(productfilter) == str:
         return jsonify("No product fits the filter options choosen")
@@ -283,7 +295,8 @@ def choosewinner():
 #Logs the user out and redirects them to the login page
 @app.route('/logout', methods=['POST'])
 def logout():
-    logout = request.get_data()
+    request.get_data()
+    remove_filter()
     removeuserinfo()
     
     return "redirect"

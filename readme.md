@@ -1,9 +1,13 @@
 Site uses jquery and ajax, but jquery is only used 4 times and isnt very complicated.
 Site also uses flask add ons: PIL and IObytes
 
+
+To run the app: python3 app.py
+The database should already be created with some base products
+
 -Main functionality of page
-    -The page functions mainly like a auctioning site, except in this case, the winner is selected randomly among the people who spent a ticket on the product. If the product doesnt reach the minimum cost selected by the creator of the product, the product will not be sold, and all tickets will be returned to the users who spent money on tickets for the product.
-    Every ticket spent will increase the users chance of winning the product.
+    -The page functions mainly like a auctioning site, except in this case, the winner is selected randomly among the people who spent a ticket on the product. Even though a user pays the full minimum cost, they are not sure they will win the product. If the product doesnt reach the minimum cost selected by the creator of the product, the product will not be sold, and all tickets will be returned to the users who spent money on tickets for the product.
+    Every ticket spent will increase the users chance of winning the product. Due to the winner being choosen by time, this allowes for the product to go way over what the minimumcost for sale was set as, making it a viable option for selling whatever you may want.
 
 -Login page
     -The user will write their username and password which will be checked against the backend
@@ -16,11 +20,14 @@ Site also uses flask add ons: PIL and IObytes
     -If the registration fails, the user will get a pop up box explaining the error, and lets the user try again
 
 -home page
+    -After the user has logged in, their userdata will be stored inn currentuserdata, this will hold their username and currentticketcount, this makes updating their tickets easier and makes it easier to regularly send their data to the frontend for them to see.
     -logo in the top left corner will return the user to the login page
     -Filter
         -Filtering allowes the user to filter based upon the name of the product, and what genre they fit in
         -Beneath the filter options, there are 2 options for sorting, there the user can either sort the products by highest ticketcount spent, or alphabetically, not both at the same time
         -Both filter and sort are enabled by pressing the filter button
+        -Some products will be added either without a filter, just to show that a product doesnt automatically get a genre.
+        -Due to the way a plain js router is set up and how it communicates with the backend, the simplest way to store the users filter preferences seemed to be a global value.
     -products
         -Every product has its own delete button which will delete the product
             -On delete all the tickets spent on the product will be returned to the users who spent money on it
