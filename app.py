@@ -45,7 +45,7 @@ def close_connection(exception):
         db.close()
 
 
-#Handles the data and gives it back in a more managable format. 
+#Handles the data and gives it back in a more managable format.
 def handle_data(string):
     string = str(string)
     string = string.split("&")
