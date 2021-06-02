@@ -28,14 +28,14 @@ def create_connection(db_file):
 sql_create_user1_table = """CREATE TABLE IF NOT EXISTS users1 (
                                 username TEXT PRIMARY KEY,
                                 password TEXT,
-                                email TEXT,
-                                products ID PRIMARYKEY
+                                email TEXT
                             );"""
 
 #Creates a product table
 #Id, uniqeuly id's every product, and increments on each product added to the database
 #Name, a name for each product, not unique due to products names might be similar
-#img blob -----BURDE BLI FJERNA
+#img blob - After much trial and error, this was not needed in the database when i managed to get the images in
+# ,but removing it caused a lot of bugs, so i reverted and kept it in due to time pressure
 #description, a description for the product
 #tickets, how many tickets the different users have spent on the specific product
 #mincost, minimum cost that allowes a product to be sold
@@ -91,10 +91,9 @@ def add_user(conn, username,password,email):
     :param username:
     :param password:
     :param email:
-    :param products:
     """
-    sql = ''' INSERT INTO users1(username,password,email,products)
-              VALUES(?,?,?,null) '''
+    sql = ''' INSERT INTO users1(username,password,email)
+              VALUES(?,?,?) '''
     
     sql2 = ''' INSERT INTO usertickets(username,tickets)
                 VALUES(?,1000)'''

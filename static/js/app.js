@@ -353,7 +353,8 @@ async function onRouteChanged() {
                 }
             });
 
-            // Adds products to the database
+            // Adds products to the database, even though image is not used, a value is sent to the database, this is because removing the 
+            // image attribute introdues some bugs. Due to time pressure, id rather focus on other issues and change it at a later date
             async function sendprod(){
                 var pname = document.getElementById('pname').value
                 var description = document.getElementById('description').value
@@ -435,7 +436,7 @@ window.addEventListener('filterbutton', onclick)
 
 /////////////FUNCTIONS///////////////
 //////////////////////Filtration and sorting functions///////////////////////
-//Initiates the countdown for filtered products
+//Initiates the countdown for filtered products and changes values if values are below
 function startcountdownfilter(listelement) {
     var countdown = new Date(listelement).getTime()
     var currentdate = new Date().getTime();
