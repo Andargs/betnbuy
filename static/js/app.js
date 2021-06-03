@@ -334,7 +334,6 @@ async function onRouteChanged() {
             document.getElementById('userlogo').addEventListener('click',showuser)
             document.getElementById('createprod').addEventListener('click',sendprod)
             document.getElementById('logout').addEventListener('click', logoutconfirmation)
-            document.getElementById('file').addEventListener('change', sendimg)
 
             //////////////FUNCTIONS////////////////
             //Sjekker at brukeren er logget inn og henter ut navn
@@ -392,9 +391,7 @@ async function onRouteChanged() {
                         alert(result)
                         window.location.reload()
                     }
-                    window.location.hash = '#home'
-                    window.location.reload()
-
+                    runimg()
                 }
             }
 
@@ -508,7 +505,6 @@ async function filter(written, house, vehicle, travel, furniture, other,Alphabet
         let result = await response.json()
         products = document.getElementById('products')
         products.innerHTML = ``
-        console.log("Dette er string")
         if (result[0] == null){
             alert("No products fits the description given")
         }
@@ -689,6 +685,13 @@ function logoutconfirmation(){
     }
 }
 
+//Due to the image having to be sent after the product is updated, but async functions not being able to be run inside other async functions
+//I had to create a mediate function to run it trough. Not really great code, but it leviates a problem when image is not directly
+//connected to the product
+function runimg(){
+    sendimg()
+}
+
 //Sends the image to the backend for processing
 async function sendimg(){
     img = document.getElementById('file').files[0]
@@ -701,5 +704,7 @@ async function sendimg(){
     });
     if (response.status == 200) {
         let result = await response.text()
+        window.location.hash = '#home'
+        window.location.reload()
 }
 }
