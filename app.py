@@ -287,7 +287,6 @@ def imageproc():
     img = Image.open(io.BytesIO(img))
     id = get_id(conn)
     #Due to the product not being in the database yet, i have to get the id + 1
-    id = int(id)
     if img:
         id = str(id)
         navn = f"{id}img"
