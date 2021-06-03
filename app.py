@@ -285,12 +285,11 @@ def imageproc():
     conn = get_db()
     img = request.get_data()
     img = Image.open(io.BytesIO(img))
-    id = get_id(conn)
-    #Due to the product not being in the database yet, i have to get the id + 1
+    id = get_id(conn)       #Gets the products id
     if img:
         id = str(id)
         navn = f"{id}img"
-        img.save('./static/images/'+f'{navn}.png', 'PNG')
+        img.save('./static/images/'+f'{navn}.png', 'PNG')  #Uses the images id to make frontend images easier to handle
         
         
     return ""

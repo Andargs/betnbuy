@@ -4,7 +4,7 @@ Site uses jquery and ajax, but jquery is only used 4 times and isnt very complic
 Site also uses flask add ons: PIL and IObytes to handle images
 
 
-To run the app be in the root of eksamen3 folder, and run: python3 app.py
+To run the app be in the root of eksamen folder, and run: python3 app.py
 The database should already be created with some base products
 
 
