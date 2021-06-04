@@ -1,7 +1,7 @@
 Git repository: https://github.com/Andargs/betnbuy.git
 
-Site uses jquery and ajax, but jquery is only used 4 times and isnt very complicated.
-Site also uses flask add ons: PIL and IObytes to handle images
+Site uses jquery and ajax, but jquery is only used for a few tasks.
+Site also uses python add ons: PIL(pillow) and IObytes to handle images
 
 
 To run the app be in the root of eksamen folder, and run: python3 app.py
